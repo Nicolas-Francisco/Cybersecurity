@@ -15,7 +15,7 @@ b)  Debido a que p y q son primos consecutivos, sabemos de primera
         
     Y además sabemos que q^2 > pq = N. Luego:
         sqrt(N) = sqrt(p*q) < sqrt(q^2) = q 
-        sqrt(N) = sqrt(p^2 + p*x)   (por el desarrollo anterior)
+        sqrt(N) = sqrt(p^2 + p*x) < sqrt(q^2) (por el desarrollo anterior)
     
     Finalmente p = sqrt(p^2) < sqrt(p^2 + p*x) < sqrt(q^2) = q,
     o en otras palabras:
