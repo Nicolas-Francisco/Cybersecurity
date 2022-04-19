@@ -75,6 +75,7 @@ if __name__ == "__main__":
 # al servidor B este lanza algún error de inconsistencia del mensaje (ya
 # sea que el ultimo byte no calza con el padding, que existe un carácter 
 # inválido, o que existe un byte que no corresponde a codificación hexadecimal).
-# Mientras que si se modifica gran parte del mensaje cifrado, el servidor
+# Mientras que si se modifica gran parte del mensaje cifrado enviando un 
+# mensaje C completamente distinto a los registrados por el programa, el servidor
 # sigue lanzando algún error de inconsistencia (como un input JSON inesperado),
 # pero este tarda un poco más en informarlo.

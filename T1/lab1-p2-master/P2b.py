@@ -1,8 +1,14 @@
-import socket
+# P2b - Utilice el código base para crear un programa que envíe un texto al
+# servicio A, reciba su respuesta, envíe esa respuesta al servicio B y reciba la
+# respuesta de este servicio.
 
-# We connect to a (host,port) tuple
+# Para esta parte solo basta con conectarse a ambos puertos de la IP
+# Y enviar al servidor B el mensaje recibido por el servidor A después
+# de enviar un mensaje a cifrar.
+import socket
 import utils
 
+# Creamos las tuplas (IP, puerto) de ambos servidores
 ServerA = ("172.17.69.107", 5312)
 ServerB = ("172.17.69.107", 5313)
 
@@ -12,19 +18,17 @@ if __name__ == "__main__":
 
     while True:
         try:
-            # Read a message from standard input
+            # Se guarda el mensaje M a enviar al servidor A
             response = input("send a message: ")
-
-            # You need to use encode() method to send a string as bytes.
             print("[Client] \"{}\"".format(response))
+
+            # Se envía el mensaje M al servidor A
             resp_A = utils.send_message(sock_input_A, sock_output_A, response)
             print("[ServerA] \"{}\"".format(resp_A))
-            # Wait for a response and disconnect.
 
+            # Se evía el mensaje cifrado C enviado por A al servidor B
             resp_B = utils.send_message(sock_input_B, sock_output_B, resp_A)
             print("[ServerB] \"{}\"".format(resp_B))
-            # Wait for a response and disconnect.
-
 
         except Exception as e:
             print(e)

@@ -1,7 +1,8 @@
-import socket
+# P2d - Cree una función que permita descifrar el último carácter del texto cifrado.
 
-# We connect to a (host,port) tuple
+import socket
 import utils
+import P2c
 
 CONNECTION_ADDR = ("172.17.69.107", 5312)
 
@@ -21,8 +22,3 @@ if __name__ == "__main__":
         input.close()
 
 print("modo hacker")
-
-def get_size_block():
-    return 128
-
-
