@@ -22,3 +22,9 @@ if __name__ == "__main__":
         input.close()
 
 print("modo hacker")
+
+SIZE_BLOCK=16 #bites
+# 8ef08288f8420315f91a870556d8b1086e098634e3e799ac5cd8119e105afb5d5cce400ea39c11561ecc4c2
+C= bytearray.fromhex(resp) #[1,2,3,4,5,6,7,8]
+len_c = len(C)
+C_n = C[len_c-1]
