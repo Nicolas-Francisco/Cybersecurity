@@ -3,6 +3,7 @@
 import socket
 import utils
 import P2c
+SIZE_BLOCK = 16 # bytes
 
 CONNECTION_ADDR = ("172.17.69.107", 5312)
 
@@ -23,8 +24,12 @@ if __name__ == "__main__":
 
 print("modo hacker")
 
-SIZE_BLOCK=16 #bites
-# 8ef08288f8420315f91a870556d8b1086e098634e3e799ac5cd8119e105afb5d5cce400ea39c11561ecc4c2
-C= bytearray.fromhex(resp) #[1,2,3,4,5,6,7,8]
-len_c = len(C)
-C_n = C[len_c-1]
+C = bytearray.fromhex(resp)
+
+def get_last_block(C):
+    return C[-SIZE_BLOCK:]
+
+Cn = get_last_block(C)
+Cn1 = get_last_block(C[0:-SIZE_BLOCK])
+Cn_block1 = C[-1:]
+Cn1_block1 = Cn1[-1:]
