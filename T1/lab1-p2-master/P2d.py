@@ -44,6 +44,7 @@ Mn_menos_1[SIZE_BLOCK-1]=0
 i=1
 sock_input, sock_output = utils.create_socket(SERVER_B)
 while i<=256:
+    print("[{},256]".format(i))
     #Creo una copia de c_block
     C_block_copy =C_block
     #Cambio Cn-1 por Mn-1
@@ -56,7 +57,7 @@ while i<=256:
     if "pkcs7:" in resp2:
         Mn_menos_1[SIZE_BLOCK-1]=i
         i+=1
-    if i==256:
+    elif i==256:
         print("Saldre poque el while ya no cumple la condicion")
     else:
         Mn_menos_1_respaldo=Mn_menos_1
@@ -72,18 +73,20 @@ while i<=256:
         if not "pkcs7:" in resp3:
             print("sali del while por padding verificado")
             break
-        else:
-            print("era posible padding pero fallo la segunda")
+        #else:
+            #print("era posible padding pero fallo la segunda")
 
+# XOR entre Mn-1[SIZE_BLOCK-1] y [0x01]
+In_last_int = (i-1)^1
 
-in_last_int = int.from_bytes(Mn_menos_1_respaldo,sys.byteorder) ^ i
+print("Mn-1: {}".format(Mn_menos_1_respaldo[SIZE_BLOCK-1] ))
+print("[0X0{}]".format(i-1))
+print("In: {}".format(In_last_int))
 
-print("Mn-1: {}".format(Mn_menos_1_respaldo))
-print("[0X0{}]".format(i))
-print("In: {}".format(in_last_int))
+# XOR Cn-1[SIZE_BLOCK-1] y In[SIZE_BLOCK-1]
+Bn_last_caracter=Cn_menos_1[SIZE_BLOCK-1] ^ In_last_int
 
-Bn_last_caracter=int.from_bytes(Cn_menos_1,sys.byteorder) ^ in_last_int
-caca = utils.hex_to_bytes(hex(Bn_last_caracter))
-msj = utils.hex_to_bytes(hex(mensaje))
-print("Bn: {}".format(caca))
-print("Mensaje: {}".format(msj))
+#Bn en formato string
+print("Bn_int: {}".format(Bn_last_caracter))
+#Bn en formato hexadecimal
+print("Bn_hexadecimal: {}".format(str(Bn_last_caracter).encode('utf-8').hex()))
