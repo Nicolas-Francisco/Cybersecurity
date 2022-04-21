@@ -2,8 +2,11 @@
 
 from re import I
 import socket
+from traceback import print_tb
+from unittest import TestCase
 import utils
 import P2c
+import sys
 SIZE_BLOCK = 16 # bytes
 
 SERVER_A= ("172.17.69.107", 5312)
@@ -27,7 +30,7 @@ C_bytes = utils.hex_to_bytes(resp)
 #separo c_bytes en bloques de 16
 C_block = utils.split_blocks(C_bytes, SIZE_BLOCK)
 Cn = C_block[-1] #Obtengo el ultimo bloque
-Cn_menos_1 = C_block[-2]
+Cn_menos_1 = C_block[-2]#obtengo el penultimo bloque
 
 #Obtengo el ultimo bytes
 Cn_last_byte = Cn[SIZE_BLOCK-1]
@@ -41,13 +44,46 @@ Mn_menos_1[SIZE_BLOCK-1]=0
 i=1
 sock_input, sock_output = utils.create_socket(SERVER_B)
 while i<=256:
+    #Creo una copia de c_block
+    C_block_copy =C_block
     #Cambio Cn-1 por Mn-1
-    C_block[-2]=Mn_menos_1
+    C_block_copy[-2]=Mn_menos_1
     #Junto los bloques y lo paso a hexagonal
-    C_Modificado=utils.bytes_to_hex(utils.join_blocks(C_block))
+    C_Modificado=utils.bytes_to_hex(utils.join_blocks(C_block_copy))
     #Envio el mensaje codificado al servidor B
     resp2 = utils.send_message(sock_input, sock_output, C_Modificado)
 
-    Mn_menos_1[-1:]=i
-    i+=1
+    if "pkcs7:" in resp2:
+        Mn_menos_1[SIZE_BLOCK-1]=i
+        i+=1
+    if i==256:
+        print("Saldre poque el while ya no cumple la condicion")
+    else:
+        Mn_menos_1_respaldo=Mn_menos_1
+        #cambio M_n-1[Size_BLOCK-2] a cualquier wea
+        Mn_menos_1[SIZE_BLOCK-2]=1
+        #Cambio Cn-1 por Mn-1
+        C_block_copy[-2]=Mn_menos_1
+        #Junto los bloques y lo paso a hexagonal
+        C_Modificado=utils.bytes_to_hex(utils.join_blocks(C_block_copy))
+        #Envio el mensaje codificado al servidor B
+        resp3 = utils.send_message(sock_input, sock_output, C_Modificado)
 
+        if not "pkcs7:" in resp3:
+            print("sali del while por padding verificado")
+            break
+        else:
+            print("era posible padding pero fallo la segunda")
+
+
+in_last_int = int.from_bytes(Mn_menos_1_respaldo,sys.byteorder) ^ i
+
+print("Mn-1: {}".format(Mn_menos_1_respaldo))
+print("[0X0{}]".format(i))
+print("In: {}".format(in_last_int))
+
+Bn_last_caracter=int.from_bytes(Cn_menos_1,sys.byteorder) ^ in_last_int
+caca = utils.hex_to_bytes(hex(Bn_last_caracter))
+msj = utils.hex_to_bytes(hex(mensaje))
+print("Bn: {}".format(caca))
+print("Mensaje: {}".format(msj))
