@@ -4,6 +4,7 @@
 # Para lo anterior, programaremos el algoritmo descrito en el 
 # enunciado de la tarea.
 
+from ctypes.wintypes import SIZE
 import utils
 SIZE_BLOCK = 16 # bytes
 
@@ -14,7 +15,7 @@ SERVER_B = ("172.17.69.107", 5313)
 # mensaje por defecto para la prueba
 mensaje = "si puedes leer esto, eres un hacker"
 
-def last_byte_decypher(mensaje):
+def last_byte_decypher(mensaje, position, Ins):
     sock_input, sock_output = utils.create_socket(SERVER_A)
 
     # Enviamos el mensaje y conseguimos su codificación
@@ -38,15 +39,21 @@ def last_byte_decypher(mensaje):
 
     # Se guarda Cn-1 en una variable nueva
     Mn_menos_1=Cn_menos_1
+
+    if position != SIZE_BLOCK:
+        for j in range(position,SIZE_BLOCK):
+            #Mn-1[J]=In-1[J]+(Blocksize-position)
+            Mn_menos_1[j]=Ins[0]^(SIZE_BLOCK-position+1)
+
     # Mn-1[BlockSize-1]=[0x00]
-    Mn_menos_1[SIZE_BLOCK-1]=0
+    Mn_menos_1[position-1]=0
 
     # while Dn[blockSize-1]!=[0x00], aumentar Mn-1[BlockSize-1] en 1
     # y seguir su verificación
     i=1
     sock_input, sock_output = utils.create_socket(SERVER_B)
     while i < 256:
-        print("[{},256]".format(i))
+        #print("[{},256]".format(i))
 
         # creamos una copia de c_block
         C_block_copy =C_block
@@ -63,12 +70,9 @@ def last_byte_decypher(mensaje):
         # Si el servidor B responde con un mensaje de error
         if "pkcs7:" in resp2: 
             # Avanzamos el i en 1
-            Mn_menos_1[SIZE_BLOCK-1] = i
+            Mn_menos_1[position-1] = i
             i+=1
 
-        # si ya terminó y no se encontró, tenemos un error
-        elif i==255:
-            print("Saldre poque el while ya no cumple la condicion")
 
         # Si no hubo error
         else:
@@ -76,7 +80,7 @@ def last_byte_decypher(mensaje):
             Mn_menos_1_respaldo = Mn_menos_1
 
             # Cambiamos M_n-1[Size_BLOCK-2] a otro byte
-            Mn_menos_1[SIZE_BLOCK-2]=1
+            Mn_menos_1[position-2]=1
 
             # Reemplazamos Cn-1 por Mn-1
             C_block_copy[-2]=Mn_menos_1
@@ -92,21 +96,26 @@ def last_byte_decypher(mensaje):
                 print("VERIFIED PADDING")
                 break
 
+    print("------------------------------")
     # XOR entre Mn-1[SIZE_BLOCK-1] y [0x01]
-    In_last_int = (i-1)^1
+    In_last_int = (i-1)^(SIZE_BLOCK-position+1)
 
     # Printeamos los resultados obtenidos del programa
-    print("Mn-1: {}".format(Mn_menos_1_respaldo[SIZE_BLOCK-1] ))
+    print("Mn-1: {}".format(Mn_menos_1_respaldo[position-1] ))
     print("[0X0{}]".format(i-1))
     print("In: {}".format(In_last_int))
 
     # XOR Cn-1[SIZE_BLOCK-1] y In[SIZE_BLOCK-1]
-    Bn_last_caracter=Cn_menos_1[SIZE_BLOCK-1] ^ In_last_int
+    Bn_last_caracter=Cn_menos_1[position-1] ^ In_last_int
 
     # Bn en formato string
     print("Bn_int: {}".format(Bn_last_caracter))
     # Bn en formato hexadecimal
     print("Bn_hexadecimal: {}".format(str(Bn_last_caracter).encode('utf-8').hex()))
+    Ins.append(In_last_int)
+    return Ins
 
 if __name__ == "__main__":
-    last_byte_decypher(mensaje)
+    arrayIns=[]
+    arrayIns=last_byte_decypher(mensaje,16,arrayIns)
+    arrayIns=last_byte_decypher(mensaje,15,arrayIns)
