@@ -15,15 +15,8 @@ SERVER_B = ("172.17.69.107", 5313)
 # mensaje por defecto para la prueba
 mensaje = "si puedes leer esto, eres un hacker"
 
-def last_byte_decypher(mensaje, position, Ins):
-    sock_input, sock_output = utils.create_socket(SERVER_A)
-
-    # Enviamos el mensaje y conseguimos su codificación
-    try:
-        resp = utils.send_message(sock_input, sock_output, mensaje)
-    except Exception as e:
-        print(e)
-        input.close()
+def last_byte_decypher(resp, position, Ins):
+    
 
     # Transformamos el cifrado hexagonal en bytes
     C_bytes = utils.hex_to_bytes(resp)
@@ -53,7 +46,7 @@ def last_byte_decypher(mensaje, position, Ins):
     i=1
     sock_input, sock_output = utils.create_socket(SERVER_B)
     while i < 256:
-        #print("[{},256]".format(i))
+        print("[{},256]".format(i))
 
         # creamos una copia de c_block
         C_block_copy =C_block
@@ -73,6 +66,9 @@ def last_byte_decypher(mensaje, position, Ins):
             Mn_menos_1[position-1] = i
             i+=1
 
+        # si ya terminó y no se encontró, tenemos un error
+        if i==255:
+            print("Saldre poque el while ya no cumple la condicion")
 
         # Si no hubo error
         else:
@@ -116,6 +112,16 @@ def last_byte_decypher(mensaje, position, Ins):
     return Ins
 
 if __name__ == "__main__":
+
+    sock_input, sock_output = utils.create_socket(SERVER_A)
+
+    # Enviamos el mensaje y conseguimos su codificación
+    try:
+        resp = utils.send_message(sock_input, sock_output, mensaje)
+    except Exception as e:
+        print(e)
+        input.close()
+
     arrayIns=[]
-    arrayIns=last_byte_decypher(mensaje,16,arrayIns)
-    arrayIns=last_byte_decypher(mensaje,15,arrayIns)
+    arrayIns=last_byte_decypher(resp,16,arrayIns)
+    arrayIns=last_byte_decypher(resp,15,arrayIns)
