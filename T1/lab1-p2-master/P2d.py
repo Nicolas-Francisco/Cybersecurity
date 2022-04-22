@@ -29,7 +29,7 @@ def last_byte_decypher(mensaje):
 
     # se separa c_bytes en bloques de 16
     C_block = utils.split_blocks(C_bytes, SIZE_BLOCK)
-    Cn = C_block[-1]            # Obtengo el ultimo bloque
+
     Cn_menos_1 = C_block[-2]    # Obtengo el penultimo bloque
 
     # Se obtienen los ultimos bytes de cada bloque
@@ -49,7 +49,7 @@ def last_byte_decypher(mensaje):
         print("[{},256]".format(i))
 
         # creamos una copia de c_block
-        C_block_copy =C_block
+        C_block_copy = C_block
 
         # cambiamos Cn-1 por Mn-1
         C_block_copy[-2] = Mn_menos_1
@@ -87,6 +87,8 @@ def last_byte_decypher(mensaje):
             # Se envía el mensaje codificado al servidor B
             resp3 = utils.send_message(sock_input, sock_output, C_Modificado)
 
+            Mn_menos_1=Mn_menos_1_respaldo
+
             # si nuevamente no lanza error, entonces encontramos un padding verificado
             if not "pkcs7:" in resp3:
                 print("VERIFIED PADDING")
@@ -95,18 +97,22 @@ def last_byte_decypher(mensaje):
     # XOR entre Mn-1[SIZE_BLOCK-1] y [0x01]
     In_last_int = (i-1)^1
 
+    f = open ('P2d.txt','w')
+
     # Printeamos los resultados obtenidos del programa
-    print("Mn-1: {}".format(Mn_menos_1_respaldo[SIZE_BLOCK-1] ))
-    print("[0X0{}]".format(i-1))
-    print("In: {}".format(In_last_int))
+    f.write("Mn-1: {}".format(Mn_menos_1[SIZE_BLOCK-1] ))
+    f.write("[0X0{}]".format(i-1))
+    f.write("In: {}".format(In_last_int))
 
     # XOR Cn-1[SIZE_BLOCK-1] y In[SIZE_BLOCK-1]
     Bn_last_caracter=Cn_menos_1[SIZE_BLOCK-1] ^ In_last_int
 
     # Bn en formato string
-    print("Bn_int: {}".format(Bn_last_caracter))
+    f.write("Bn_int: {}".format(Bn_last_caracter))
     # Bn en formato hexadecimal
-    print("Bn_hexadecimal: {}".format(str(Bn_last_caracter).encode('utf-8').hex()))
+    f.write("Bn_hexadecimal: {}".format(str(Bn_last_caracter).encode('utf-8').hex()))
+
+    f.close()
 
 if __name__ == "__main__":
     last_byte_decypher(mensaje)
