@@ -13,7 +13,7 @@ SERVER_A= ("172.17.69.107", 5312)
 SERVER_B = ("172.17.69.107", 5313)
 
 # mensaje por defecto para la prueba
-mensaje = "si puedes leer esto, eres un hacker"
+mensaje = "hellooo"
 
 def last_byte_decypher(resp, position, Ins):
     
@@ -36,7 +36,7 @@ def last_byte_decypher(resp, position, Ins):
     if position != SIZE_BLOCK:
         for j in range(position,SIZE_BLOCK):
             #Mn-1[J]=In-1[J]+(Blocksize-position)
-            Mn_menos_1[j]=Ins[0]^(SIZE_BLOCK-position+1)
+            Mn_menos_1[j]=Ins[-(j-position)]^(SIZE_BLOCK-position+1)
 
     # Mn-1[BlockSize-1]=[0x00]
     Mn_menos_1[position-1]=0
@@ -45,9 +45,10 @@ def last_byte_decypher(resp, position, Ins):
     # y seguir su verificación
     i=1
     sock_input, sock_output = utils.create_socket(SERVER_B)
+    print("ESTOY EN EL WHILE, ESPERE SU ATENCION")
     while i < 256:
-        print("[{},256]".format(i))
-
+        #print("[{},256]".format(i))
+        
         # creamos una copia de c_block
         C_block_copy =C_block
 
@@ -123,5 +124,9 @@ if __name__ == "__main__":
         input.close()
 
     arrayIns=[]
-    arrayIns=last_byte_decypher(resp,16,arrayIns)
-    arrayIns=last_byte_decypher(resp,15,arrayIns)
+    for i in range(16,0,-1):
+        print("TURNO DEL PACIENTE "+str(i))
+        arrayIns=last_byte_decypher(resp,i,arrayIns)
+
+
+    
