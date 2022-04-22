@@ -16,6 +16,8 @@ SERVER_B = ("172.17.69.107", 5313)
 mensaje = "hellooo"
 
 def last_byte_decypher(resp, position, Ins):
+    
+
     # Transformamos el cifrado hexagonal en bytes
     C_bytes = utils.hex_to_bytes(resp)
 
@@ -30,15 +32,11 @@ def last_byte_decypher(resp, position, Ins):
 
     # Se guarda Cn-1 en una variable nueva
     Mn_menos_1=Cn_menos_1
-    mn1_xor_ins = []
 
     if position != SIZE_BLOCK:
-        for j in range(position, SIZE_BLOCK):
+        for j in range(position,SIZE_BLOCK):
             #Mn-1[J]=In-1[J]+(Blocksize-position)
-            Mn_menos_1[j] = Ins[-(j-position+1)]^(SIZE_BLOCK-position+1)
-            mn1_xor_ins.append(Mn_menos_1[j])
-
-    print("mn1_xor_ins: {}".format(mn1_xor_ins))
+            Mn_menos_1[j]=Ins[-(j-position)]^(SIZE_BLOCK-position+1)
 
     # Mn-1[BlockSize-1]=[0x00]
     Mn_menos_1[position-1]=0
@@ -71,7 +69,7 @@ def last_byte_decypher(resp, position, Ins):
 
         # si ya terminó y no se encontró, tenemos un error
         if i==255:
-            print("Soy el ultimo intento")
+            print("Saldre poque el while ya no cumple la condicion")
 
         # Si no hubo error
         else:
