@@ -1,0 +1,5 @@
+Mn-1: 107
+[0X0107]
+In: 106
+Bn_int: 2
+Bn_hexadecimal: 32

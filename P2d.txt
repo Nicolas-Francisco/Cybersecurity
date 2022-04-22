@@ -1,0 +1,6 @@
+Current Time = 2022-04-22 17:07:17.219539
+Mn-1: 142
+[0X0142]
+In: 143
+Bn_int: 15
+Bn_hexadecimal: 3135
