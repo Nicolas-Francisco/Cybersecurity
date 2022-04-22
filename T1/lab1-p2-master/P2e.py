@@ -6,6 +6,9 @@
 
 from tarfile import BLOCKSIZE
 import utils
+from datetime import datetime
+now = datetime.now()
+
 SIZE_BLOCK = 16 # bytes
 
 # Tupla para la conexión entre los servidores
@@ -13,8 +16,9 @@ SERVER_A= ("172.17.69.107", 5312)
 SERVER_B = ("172.17.69.107", 5313)
 
 # mensaje por defecto para la prueba
-mensaje = "hellooo"
+mensaje = "Hola mundo"
 f = open ('P2e.txt','w')
+f.write("Current Time = {}\n".format(now))
 
 def last_byte_decypher(resp,i):
 
