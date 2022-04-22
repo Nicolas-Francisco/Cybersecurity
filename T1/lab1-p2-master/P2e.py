@@ -16,7 +16,9 @@ SERVER_A= ("172.17.69.107", 5312)
 SERVER_B = ("172.17.69.107", 5313)
 
 # mensaje por defecto para la prueba
-mensaje = "Hola mundo"
+mensaje = "eso tilin"
+Ins = []
+Bns = ""
 f = open ('P2e.txt','w')
 f.write("Current Time = {}\n".format(now))
 
@@ -32,12 +34,19 @@ def last_byte_decypher(resp,i):
 
     Cn_menos_1 = C_block[-2]    # Obtengo el penultimo bloque
 
+    # Se guarda Cn-1 en una variable nueva
+    Mn_menos_1=Cn_menos_1
+
+    if i < SIZE_BLOCK:
+        for j in range(len(Ins)):
+            #Mn-1[J]=In-1[J]+(Blocksize-position)
+            Mn_menos_1[-j-1] = Ins[j]^(SIZE_BLOCK-i+1)
+
     # Se obtienen los ultimos bytes de cada bloque
     #Cn_last_byte = Cn[SIZE_BLOCK-1]
     #Cn_menos_last_byte = Cn_menos_1[SIZE_BLOCK-1]
 
-    # Se guarda Cn-1 en una variable nueva
-    Mn_menos_1=Cn_menos_1
+    
     # Mn-1[BlockSize-1]=[0x00]
     Mn_menos_1[i-1]=0
 
@@ -46,7 +55,7 @@ def last_byte_decypher(resp,i):
     count=1
     sock_input, sock_output = utils.create_socket(SERVER_B)
     while count < 256:
-        print("[{}/256]".format(count))
+        print("{}-[{}/256]".format(i,count))
 
         # creamos una copia de c_block
         C_block_copy = C_block
@@ -66,12 +75,12 @@ def last_byte_decypher(resp,i):
             Mn_menos_1[i-1] = count
             count+=1
 
-        # si ya terminó y no se encontró, tenemos un error
-        elif count==255:
-            print("Saldre poque el while ya no cumple la condicion")
+            if count==255:
+                print("Saldre poque el while ya no cumple la condicion")
+                exit()
 
         # Si no hubo error
-        else:
+        elif (i>1):
             # recuperamos el respaldo para no perder la referencia
             Mn_menos_1_respaldo = Mn_menos_1
 
@@ -94,12 +103,23 @@ def last_byte_decypher(resp,i):
                 print("VERIFIED PADDING")
                 break
 
+            # si ya terminó y no se encontró, tenemos un error
+            if count==255:
+                print("Saldre poque el while ya no cumple la condicion")
+                exit()
+        else:
+            break
+
     # XOR entre Mn-1[SIZE_BLOCK-1] y [0x01]
     In_last_int = (count-1)^(SIZE_BLOCK-i+1)
 
     
 
     # Printeamos los resultados obtenidos del programa
+    f.write("\n")
+    f.write("---------------------------------------------\n")
+    f.write("\n")
+    f.write("Es el paciente {}\n".format(i))
     f.write("Mn-1: {}\n".format(Mn_menos_1[i-1] ))
     f.write("[0X0{}]\n".format(count-1))
     f.write("In: {}\n".format(In_last_int))
@@ -109,12 +129,15 @@ def last_byte_decypher(resp,i):
     # XOR Cn-1[SIZE_BLOCK-1] y In[SIZE_BLOCK-1]
     Bn=C_n_menos_1_original [SIZE_BLOCK-1] ^ In_last_int
 
+    
+
     # Bn en formato string
     f.write("Bn_int: {}\n".format(Bn))
     # Bn en formato hexadecimal
     f.write("Bn_hexadecimal: {}\n".format(str(Bn).encode('utf-8').hex()))
 
-    
+    Bns+=str(Bn).encode('utf-8').hex()
+    Ins.append(In_last_int)
 
 if __name__ == "__main__":
 
@@ -126,6 +149,8 @@ if __name__ == "__main__":
         print(e)
         input.close()
 
-    last_byte_decypher(resp,16)
+    for j in range(16,0,-1):
+        last_byte_decypher(resp,j)
 
+    f.write("Bns en hex: {}\n".format(Bns))
     f.close()
