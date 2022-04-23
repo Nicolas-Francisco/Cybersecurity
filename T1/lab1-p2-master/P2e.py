@@ -16,7 +16,7 @@ SERVER_A= ("172.17.69.107", 5312)
 SERVER_B = ("172.17.69.107", 5313)
 
 # mensaje por defecto para la prueba
-mensaje = "eso tilin"
+mensaje = "Hola mundo"
 Ins = []
 Bns = ""
 f = open ('P2e.txt','w')
