@@ -115,11 +115,11 @@ def last_byte_decypher(resp):
     f.close()
 
 if __name__ == "__main__":
-
+    response = input("send a message: ")
     sock_input, sock_output = utils.create_socket(SERVER_A)
     # Enviamos el mensaje y conseguimos su codificación
     try:
-        resp = utils.send_message(sock_input, sock_output, mensaje)
+        resp = utils.send_message(sock_input, sock_output, response)
     except Exception as e:
         print(e)
         input.close()

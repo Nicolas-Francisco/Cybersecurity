@@ -4,12 +4,12 @@
 # Para lo anterior, programaremos el algoritmo descrito en el 
 # enunciado de la tarea.
 
+from http.client import ResponseNotReady
 from tarfile import BLOCKSIZE
 import utils
-import P2e
 from datetime import datetime
 
-now = datetime.now()
+# now = datetime.now()
 
 SIZE_BLOCK = 16 # bytes
 
@@ -20,13 +20,11 @@ SERVER_B = ("172.17.69.107", 5313)
 # mensaje por defecto para la prueba
 mensaje = "Hola mundo"
 Ins = []
-Bns = ""
-f = open('P2f.txt','w')
-f.write("Current Time = {}\n".format(now))
-
+Bns = []
+# f = open('P2f.txt','w')
+# f.write("Current Time = {}\n".format(now))
 
 def last_block_dechipher(C_bytes, i):
-
     # se separa c_bytes en bloques de 16
     C_block = utils.split_blocks(C_bytes, SIZE_BLOCK)
     C_block_respaldo = utils.split_blocks(C_bytes, SIZE_BLOCK)
@@ -115,13 +113,13 @@ def last_block_dechipher(C_bytes, i):
     
 
     # Printeamos los resultados obtenidos del programa
-    f.write("\n")
-    f.write("---------------------------------------------\n")
-    f.write("\n")
-    f.write("Es el paciente {}\n".format(i))
-    f.write("Mn-1: {}\n".format(Mn_menos_1[i-1] ))
-    f.write("[0X0{}]\n".format(count-1))
-    f.write("In: {}\n".format(In_last_int))
+    # f.write("\n")
+    # f.write("---------------------------------------------\n")
+    # f.write("\n")
+    # f.write("Es el paciente {}\n".format(i))
+    # f.write("Mn-1: {}\n".format(Mn_menos_1[i-1] ))
+    # f.write("[0X0{}]\n".format(count-1))
+    # f.write("In: {}\n".format(In_last_int))
 
     C_n_menos_1_original = C_block_respaldo[-2]
 
@@ -131,26 +129,47 @@ def last_block_dechipher(C_bytes, i):
     
 
     # Bn en formato string
-    f.write("Bn_int: {}\n".format(Bn))
-    # Bn en formato hexadecimal
-    f.write("Bn_hexadecimal: {}\n".format(str(Bn).encode('utf-8').hex()))
+    # f.write("Bn_int: {}\n".format(Bn))
+    # # Bn en formato hexadecimal
+    # f.write("Bn_hexadecimal: {}\n".format(str(Bn).encode('utf-8').hex()))
 
-    Bns+=str(Bn).encode('utf-8').hex()
+    Bns.append(Bn)
     Ins.append(In_last_int)
 
 
 if __name__ == "__main__":
-
+    response = input("send a message: ")
     sock_input, sock_output = utils.create_socket(SERVER_A)
     # Enviamos el mensaje y conseguimos su codificación
     try:
-        resp = utils.send_message(sock_input, sock_output, mensaje)
+        resp = utils.send_message(sock_input, sock_output, response)
     except Exception as e:
         print(e)
         input.close()
 
-    for j in range(16,0,-1):
-        P2e.last_byte_decypher(resp,j)
+    # Transformamos el cifrado hexagonal en bytes
+    C_bytes = utils.hex_to_bytes(resp)
+    bloques = utils.split_blocks(C_bytes, SIZE_BLOCK)
 
-    f.write("Bns en hex: {}\n".format(Bns))
-    f.close()
+    Inses=[]
+    # Por cada bloque de 16 bytes
+    for i in range(len(bloques), 1, -1):
+        # Deciframos el último bloque 
+        for j in range(16, 0, -1):
+            last_block_dechipher(C_bytes, j)
+
+        # Obtenemos los Ins
+        Inses=Inses+Ins
+        Ins=[]
+
+        # Sacamos el último bloque de C_bytes para decifrar el anterior
+        C_bytes = C_bytes[:-SIZE_BLOCK]
+
+    # Guardamos los Bns en un string
+    Bns_string = ""
+    for k in Bns:
+        Bns_string = str(k).encode('utf-8').hex() + Bns_string
+
+    print("Bn: {}".format(Bns_string))
+    # f.write("Bns en hex: {}\n".format(Bns))
+    # f.close()

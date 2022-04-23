@@ -1,22 +1,34 @@
-# Lab1-P1
+# Tarea 1 - Informe
+### Javier Lavados Jilbert, Nicolás García Ríos
+## P1
+### a)
+El problema de la implementación de RSA es que el algoritmo de generación de claves no ocupa dos primos aleatorios, sino que obtiene uno en función del otro (utilizando la función ```next_prime```. Esto lleva a que no tenemos aleatoriedad real sobre ambos primos, vulnerando la seguridad de la clave.
 
-_(This repository makes sense in CC5312 - Computer Security course)_
+### b)
+Debido a que $$p$$ y $$q$$ son primos consecutivos, sabemos de primera mano que $$p < q$$. Además, estos dos valores no se distancian tanto unos de otros. Por otro lado, podemos desarrollar $$N$$:
 
-Behold! The best RSA key generation algorithm of the world!
+$$N = p*q $$
 
-This is an example of how to use my excellent key generation function.
 
-### How to use
+$$N = p*(p+x) $$
 
-```bash
-pip install -r requirements.txt
-python main.py
-```
 
-The previous command will create three files:
-* `plaintext.txt`: A random latin-like sentence (thanks to `lorem` library)
-* `ciphered.txt`: The previous latin-like sentence, ciphered with a random Public RSA key.
-* `deciphered.txt`:  The previous ciphered text, deciphered with the correspondent Private RSA Key (This is to show you that my keys work!)
-* `public_key.pem`: Public Key that encrypted the message.
+$$N = p^2 + p*x $$
 
-Given the private key is lost, I guarantee that you will never be able to decipher the ciphered text!
+(usando $$p + x = q$$ en la seguna igualdad)
+
+Y además sabemos que $$q^{2} > pq = N$$. Luego:
+
+$$sqrt(N) =  sqrt(p*q) < sqrt(q^2) = q$$
+
+$$sqrt(N) =  sqrt(p^2 + p*x) < sqrt(q^2)$$
+
+Finalmente $$p = sqrt(p^2) < sqrt(p^2 + p*x) < sqrt(q^2) = q$$, o en otras palabras, $$p < sqrt(N) < q$$
+
+Así, tenemos que para encontrar $$p$$ y $$q$$ basta encontrar el  siguiente número primo de $$sqrt(N)$$. 
+    
+### c)  
+Utilizaremos b) para programar una solución que nos permita quebrar la implementación de RSA. (ver P1.py)
+
+## How to Run
+Para ejecutar la P1 basta con ejecutar ```python P1.py```, pero también es necesario tener en la misma carpeta el archivo utils.py, y que el ayudante tenga la llave pública.
