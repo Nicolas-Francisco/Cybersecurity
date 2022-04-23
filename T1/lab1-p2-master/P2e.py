@@ -17,8 +17,10 @@ SERVER_B = ("172.17.69.107", 5313)
 
 # mensaje por defecto para la prueba
 mensaje = "eso tilin"
+
 Ins = []
-Bns = ""
+Bns = []
+
 f = open ('P2e.txt','w')
 f.write("Current Time = {}\n".format(now))
 
@@ -136,7 +138,7 @@ def last_byte_decypher(resp,i):
     # Bn en formato hexadecimal
     f.write("Bn_hexadecimal: {}\n".format(str(Bn).encode('utf-8').hex()))
 
-    Bns+=str(Bn).encode('utf-8').hex()
+    Bns.append(Bn)
     Ins.append(In_last_int)
 
 if __name__ == "__main__":
@@ -152,5 +154,11 @@ if __name__ == "__main__":
     for j in range(16,0,-1):
         last_byte_decypher(resp,j)
 
-    f.write("Bns en hex: {}\n".format(Bns))
+    
+    Bns_string = ""
+    for k in Bns:
+        Bns_string=str(k).encode('utf-8').hex()+Bns_string
+
+    f.write("Bns en hex: {}\n".format(Bns_string))
     f.close()
+    print(Bns_string)
