@@ -34,8 +34,7 @@ if __name__ == "__main__":
                 break
 
             print("Texto en request recibida: {}".format(data.decode()))
-            print("IP en request recibida: {}".format())
-            
+            print("IP en request recibida: {}".format(addr[1]))
 
             conn.send("Mensaje recibido :D".encode())
         conn.close()
