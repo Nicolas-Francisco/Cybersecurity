@@ -44,6 +44,7 @@ if __name__ == "__main__":
             backend = default_backend()     # Configuración que la librería pide pero no usa por un problema de diseño
             key = os.urandom(32)            # Llave usada por el cifrador de bloque
             iv = os.urandom(16)             # Vector de inicialización usado por el modo
+            MODE = modes.CBC(iv)
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
             encryptor = cipher.encryptor() 
             ct = encryptor.update(msj.encode('utf-8')) + encryptor.finalize()
