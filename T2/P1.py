@@ -17,7 +17,6 @@ if __name__ == "__main__":
 
     sock_input.bind(CONNECTION_ADDR)
     sock_input.listen(5)
-    hex_msj = ''
 
     while True:
         conn, addr = sock_input.accept()
@@ -27,7 +26,7 @@ if __name__ == "__main__":
        
         while True:
             try:
-                data = conn.recv(1024)
+                data = conn.recv(16)
 
             except Exception as e:
                 print(e)
@@ -38,25 +37,30 @@ if __name__ == "__main__":
             print("Texto en request recibida: {}".format(data.decode()))
             print("IP en request recibida: {}".format(addr[1]))
             conn.send("Mensaje recibido".encode())
-            
-            msj = formatMessage.format(data.decode(), SECRET)
 
+            # Primer gezeo (gzip) el msj
+            print("Largo de respuesta no comprimida: {}".format(len(data)))
+            t=gzip.compress(data)
+            print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
+ 
+            # Segundo aeseo (AES-CBC) 
             backend = default_backend()     # Configuración que la librería pide pero no usa por un problema de diseño
-            key = os.urandom(32)            # Llave usada por el cifrador de bloque
+            key = os.urandom(16)            # Llave usada por el cifrador de bloque
             iv = os.urandom(16)             # Vector de inicialización usado por el modo
-            MODE = modes.CBC(iv)
+
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
             encryptor = cipher.encryptor() 
-            ct = encryptor.update(msj.encode('utf-8')) + encryptor.finalize()
-
-            print("Largo de respuesta no comprimida: {}".format(len(ct)))
+            ct = encryptor.update(t*16) # Entrega parte de lo encriptado
+            ct += encryptor.finalize() # Devuelve todo lo encriptado, en caso de haber quedado datos sin devolver anteriormente
             
-            hex_msj = ct.hex()
-            print("Mensaje en hexadecimal: {}".format(hex_msj))
-            with gzip.open('ciphered.txt.gz', 'wb') as f:
-                f.write(ct.hex())
+            
 
-            print("Largo de respuesta comprimida con gzip cifrada: {}".format())
+            #Por ultimo, hexagoneo (hexstring)
+            msj = formatMessage.format(ct, SECRET)
+            hex_msj = msj.encode('utf-8').hex()
+            print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)/2))
+            
+        
 
         conn.close()
         print('Desconecta3')
