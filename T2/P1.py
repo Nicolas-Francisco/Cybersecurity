@@ -6,8 +6,8 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding 
 
-# CONNECTION_ADDR = ('localhost', 5327)
-CONNECTION_ADDR = ("172.17.69.107", 5327)
+CONNECTION_ADDR = ('localhost', 5327)
+#CONNECTION_ADDR = ("172.17.69.107", 5327)
 
 # header solicitado
 formatMessage = "GET {} HTTP/1.1\nCookie: secret={}\nHost: cc5325.dcc\n\n"
@@ -28,7 +28,7 @@ if __name__ == "__main__":
        
         while True:
             try:
-                data = conn.recv(1024)
+                data = conn.recv(4096)
 
             except Exception as e:
                 print(e)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
             # log solicitado
             print("-----------------------------------------------------")
             print("Fecha del log: {}".format(actual_time))
-            print("Texto en request recibida: {}".format(data.decode()), end="")
+            print("Texto en request recibida: {}".format(data.decode()))
             print("IP en request recibida: {}".format(addr[1]))
 
             # se dan los datos recibidos por el servidor y el mensaje secreto
@@ -66,6 +66,7 @@ if __name__ == "__main__":
             t_padded = padder.update(t)
             t_padded += padder.finalize()
 
+            print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
             # Se cifra el mensaje con padding
             ct = encryptor.update(t_padded)     # Entrega parte de lo encriptado
             ct += encryptor.finalize()          # Devuelve todo lo encriptado
@@ -75,7 +76,7 @@ if __name__ == "__main__":
             print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)/2))
 
             # Se envia el mensaje cifrado. En este caso no es necesario
-            # conn.send(hex_msj.encode())
+            conn.send(hex_msj.encode())
 
         conn.close()
         print('Desconecto')
