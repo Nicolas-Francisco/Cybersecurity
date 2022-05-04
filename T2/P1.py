@@ -7,7 +7,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding 
 
 CONNECTION_ADDR = ('localhost', 5327)
-#CONNECTION_ADDR = ("172.17.69.107", 5327)
+# CONNECTION_ADDR = ("172.17.69.107", 5327)
 
 # header solicitado
 formatMessage = "GET {} HTTP/1.1\nCookie: secret={}\nHost: cc5325.dcc\n\n"
@@ -73,7 +73,7 @@ if __name__ == "__main__":
             
             # Se pasa el mensaje cifrado a hexadecimal
             hex_msj = ct.hex()
-            print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)/2))
+            print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
 
             # Se envia el mensaje cifrado. En este caso no es necesario
             conn.send(hex_msj.encode())
