@@ -15,8 +15,6 @@ SECRET = ''     # secreto que queremos encontrar
 
 X = ''                                  # bytearray o string
 GZIP_X = gzip.compress(X.encode())      # gzip de X
-UNKOWN_START = 'Cookie: secret='
-UNKOWN_END = '\nHost: cc5325.dcc\n\n'
 key = os.urandom(16)  
 iv = os.urandom(16)   
 
@@ -30,8 +28,7 @@ def encrypt_aes_cbc(msj):
 
 
 def COMPRESSION_ORACLE(DATA):
-    X = UNKOWN_START + DATA + UNKOWN_END
-    return len(encrypt_aes_cbc(gzip.compress(X.encode())))
+    return len(encrypt_aes_cbc(gzip.compress(DATA.encode())))
 
 
 def ALGORITHM(DATA):
@@ -70,14 +67,14 @@ def COMPUTE_PADDING(KNOWN):
     return BASURA[:-1]
 
 
-def CRIME_ATTACK():
+def CRIME_ATTACK(MSJ):
     # computamos el padding
-    PADDING = COMPUTE_PADDING(KNOWN)
+    PADDING = COMPUTE_PADDING(MSJ)
     # computamos la respuesta
-    RESPONSE = ALGORITHM(KNOWN + PADDING)
-    # computamos el secreto
-    SECRET = ''
+    RESPONSE = ALGORITHM(PADDING)
+    
     for r in RESPONSE:
         SECRET += r[-1]
+        
     print("[CRIME RESPONSE] \"{}\"".format(SECRET))
     return SECRET
