@@ -79,4 +79,4 @@ if __name__ == "__main__":
             conn.send(hex_msj.encode())
 
         conn.close()
-        print('Desconecto')
+        print('Closing Server...')

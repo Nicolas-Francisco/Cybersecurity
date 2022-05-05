@@ -10,13 +10,13 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding 
 
 W = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-KNOWN = ''      # porción del texto adyascente al secreto
+KNOWN = 'Cookie: secret='      # porción del texto adyascente al secreto
 SECRET = ''     # secreto que queremos encontrar
 
 X = ''                                  # bytearray o string
 GZIP_X = gzip.compress(X.encode())      # gzip de X
-UNKOWN_START = ''
-UNKOWN_END = ''
+UNKOWN_START = 'Cookie: secret='
+UNKOWN_END = '\nHost: cc5325.dcc\n\n'
 key = os.urandom(16)  
 iv = os.urandom(16)   
 
@@ -37,7 +37,7 @@ def COMPRESSION_ORACLE(DATA):
 def ALGORITHM(DATA):
     POSSIBLE = []   # arreglo vacío con todas las respuestas posibles
     y = '#$&!°'          # y es el conjunto de 5 a 10 carácteres fuera de w
-    UNCOMPRESSED_LENGTH = COMPRESSION_ORACLE(KNOWN + y)
+    # UNCOMPRESSED_LENGTH = COMPRESSION_ORACLE(KNOWN + y)
     NO_W = '#$&!°'       # conjunto de caracteres que no están en w
     for c in W:     # recorremos todos los caracteres de w
         BASE_LENGTH = COMPRESSION_ORACLE(KNOWN + NO_W + c)
@@ -52,6 +52,7 @@ def ALGORITHM(DATA):
         for p in POSSIBLE:
             RESPONSES += ALGORITHM(KNOWN + p)
 
+    print(RESPONSES)
     return RESPONSES
 
 
@@ -78,4 +79,5 @@ def CRIME_ATTACK():
     SECRET = ''
     for r in RESPONSE:
         SECRET += r[-1]
+    print("[CRIME RESPONSE] \"{}\"".format(SECRET))
     return SECRET
