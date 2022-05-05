@@ -17,10 +17,10 @@ X = ''                                  # bytearray o string
 GZIP_X = gzip.compress(X.encode())      # gzip de X
 UNKOWN_START = ''
 UNKOWN_END = ''
+key = os.urandom(16)  
+iv = os.urandom(16)   
 
-def encrypt_aes_cbc(msj):
-    key = os.urandom(16)            
-    iv = os.urandom(16)            
+def encrypt_aes_cbc(msj):           
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor() 
     padder = padding.PKCS7(algorithms.AES.block_size).padder()
@@ -36,9 +36,9 @@ def COMPRESSION_ORACLE(DATA):
 
 def ALGORITHM(DATA):
     POSSIBLE = []   # arreglo vacío con todas las respuestas posibles
-    y = ''          # y es el conjunto de 5 a 10 carácteres fuera de w
+    y = '#$&!°'          # y es el conjunto de 5 a 10 carácteres fuera de w
     UNCOMPRESSED_LENGTH = COMPRESSION_ORACLE(KNOWN + y)
-    NO_W = ''       # conjunto de caracteres que no están en w
+    NO_W = '#$&!°'       # conjunto de caracteres que no están en w
     for c in W:     # recorremos todos los caracteres de w
         BASE_LENGTH = COMPRESSION_ORACLE(KNOWN + NO_W + c)
         C_LENGTH = COMPRESSION_ORACLE(KNOWN + c + NO_W)
