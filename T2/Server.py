@@ -2,11 +2,17 @@ import socket
 import gzip
 import time
 import os
+import sys
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding 
 
-CONNECTION_ADDR = ('localhost', 5327)
+if len(sys.argv) != 2:
+    print('Use: ' + 'IP VPN SERVIDOR')
+    sys.exit(1)
+
+
+CONNECTION_ADDR = (sys.argv[1], 5327)
 # CONNECTION_ADDR = ("172.17.69.107", 5327)
 
 # header solicitado
@@ -16,6 +22,7 @@ formatMessage = "GET {} HTTP/1.1\nCookie: secret={}\nHost: cc5325.dcc\n\n"
 SECRET = "H0LAaaa3ST03SUNS3CRE70MUYS3CR3T0"
 
 if __name__ == "__main__":
+    print("Servidor inicializado, a la espera de cliente")
     sock_input = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock_output = sock_input.makefile(errors="ignore")
 

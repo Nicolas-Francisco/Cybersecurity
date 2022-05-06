@@ -1,11 +1,14 @@
-from re import I
 import socket
 import random
 import time
 import os
+import sys
 
+if len(sys.argv) != 2:
+    print('Use: ' + 'IP VPN SERVIDOR')
+    sys.exit(1)
 
-CONNECTION_ADDR = ('localhost', 5327)
+CONNECTION_ADDR = (sys.argv[1], 5327)
 
 def COMPRESSION_ORACLE(MSJ):
     # nos conectamos con el socket
@@ -66,8 +69,8 @@ def CRIME_ATTACK(IKNOW):
                 POSSIBLES.append(p+j)
         RESPONSE = POSSIBLES
         left -= 1
-        print("[SECRET] {}".format(RESPONSE))
-    return RESPONSE
+        print("Lista de posibles valores de SECRET = {}". format(RESPONSE))
+    return "".join(RESPONSE)
 
 
 if __name__ == "__main__":
