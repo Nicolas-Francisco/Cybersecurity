@@ -1,5 +1,11 @@
 import socket
+import sys
 
+if len(sys.argv) != 2:
+    print('Use: ' + 'IP VPN SERVIDOR')
+    sys.exit(1)
+
+CONNECTION_ADDR = (sys.argv[1], 5327)
 CONNECTION_ADDR = ('localhost', 5327)
 
 if __name__ == "__main__":
