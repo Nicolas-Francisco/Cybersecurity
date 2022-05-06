@@ -8,7 +8,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding 
 
 if len(sys.argv) != 2:
-    print('Use: ' + 'IP VPN SERVIDOR')
+    print('Use valid IPv4_ADDRESS')
     sys.exit(1)
 
 
@@ -42,6 +42,7 @@ if __name__ == "__main__":
 
         if data_total.decode() == "$quit":
             print("Cliente desconectado")
+            file.write("Cliente desconectado\n")
             file.close()
             break
 
@@ -50,23 +51,23 @@ if __name__ == "__main__":
         print("Fecha del log: {}".format(actual_time))
         print("Texto en request recibida: {}".format(data_total))
         print("IP en request recibida: {}".format(addr[1]))
-        file.write("-----------------------------------------------------")
-        file.write("Fecha del log: {}".format(actual_time))
-        file.write("Texto en request recibida: {}".format(data_total))
-        file.write("IP en request recibida: {}".format(addr[1]))
+        file.write("-----------------------------------------------------\n")
+        file.write("Fecha del log: {}\n".format(actual_time))
+        file.write("Texto en request recibida: {}\n".format(data_total))
+        file.write("IP en request recibida: {}\n".format(addr[1]))
 
 
         # se dan los datos recibidos por el servidor y el mensaje secreto
         # al header para proceder con el cifrado
         msj = formatMessage.format(data_total, SECRET)
 
-        print("Largo de respuesta no comprimida: {}".format(len(msj)))
-        file.write("Largo de respuesta no comprimida: {}".format(len(msj)))
+        print("Largo de respuesta no comprimida: {}\n".format(len(msj)))
+        file.write("Largo de respuesta no comprimida: {}\n".format(len(msj)))
 
         # se comprime el mensaje en bytes
         t = gzip.compress(msj.encode())
         print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
-        file.write("Largo de respuesta comprimida con gzip: {}".format(len(t)))
+        file.write("Largo de respuesta comprimida con gzip: {}\n".format(len(t)))
 
         # Se crea el cifrador de bloque AES CBC
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
@@ -80,7 +81,7 @@ if __name__ == "__main__":
         t_padded += padder.finalize()
 
         print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
-        file.write("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
+        file.write("Largo de respuesta comprimida con gzip padeado: {}\n".format(len(t_padded)))
         # Se cifra el mensaje con padding
         ct = encryptor.update(t_padded)     # Entrega parte de lo encriptado
         ct += encryptor.finalize()          # Devuelve todo lo encriptado
@@ -88,7 +89,7 @@ if __name__ == "__main__":
         # Se pasa el mensaje cifrado a hexadecimal
         hex_msj = ct.hex()
         print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
-        file.write("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
+        file.write("Largo de respuesta comprimida con gzip cifrada: {}\n".format(len(hex_msj)//2))
 
         # Se envia el mensaje cifrado. En este caso no es necesario
         conn.send(hex_msj.encode())

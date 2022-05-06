@@ -31,22 +31,22 @@ def ALGORITHM(KNOWN):
     
     for c in W:         # recorremos todos los caracteres de w
         print("-----------------------------------------------------")
-        f.write("-----------------------------------------------------")
+        f.write("-----------------------------------------------------\n")
         BASE_MSJ = PADDING + KNOWN + NO_W + c
         BASE_LENGTH = COMPRESSION_ORACLE(BASE_MSJ)
         print("Texto BASE en request enviada = {}".format(BASE_MSJ))
-        f.write("Texto BASE en request enviada = {}".format(BASE_MSJ))
+        f.write("Texto BASE en request enviada = {}\n".format(BASE_MSJ))
         print("Largo de texto BASE en request = {}".format(BASE_LENGTH))
-        f.write("Largo de texto BASE en request = {}".format(BASE_LENGTH))
+        f.write("Largo de texto BASE en request = {}\n".format(BASE_LENGTH))
         
         C_MSJ = PADDING + KNOWN + c + NO_W
         C_LENGTH = COMPRESSION_ORACLE(C_MSJ)
         print("Texto C en request enviada = {}".format(C_MSJ))
-        f.write("Texto C en request enviada = {}".format(C_MSJ))
+        f.write("Texto C en request enviada = {}\n".format(C_MSJ))
         print("Largo de texto C en request = {}".format(C_LENGTH))
-        f.write("Largo de texto C en request = {}".format(C_LENGTH))
+        f.write("Largo de texto C en request = {}\n".format(C_LENGTH))
         print("-----------------------------------------------------")
-        f.write("-----------------------------------------------------")
+        f.write("-----------------------------------------------------\n")
 
         if C_LENGTH < BASE_LENGTH:
             POSSIBLE.append(c)
@@ -91,21 +91,21 @@ if __name__ == "__main__":
     
 
     print("Fecha del log: {}".format(actual_time))
-    f.write("Fecha del log: {}".format(actual_time))
+    f.write("Fecha del log: {}\n".format(actual_time))
 
     print("-----------------------------------------------------")
-    f.write("-----------------------------------------------------")
+    f.write("-----------------------------------------------------\n")
     print("-------------------- CRIME ATTACK -------------------")
-    f.write("-------------------- CRIME ATTACK -------------------")
+    f.write("-------------------- CRIME ATTACK -------------------\n")
 
     secret = CRIME_ATTACK(IKNOW)
 
     print("-----------------------------------------------------")
-    f.write("-----------------------------------------------------")
+    f.write("-----------------------------------------------------\n")
     print("[FINAL SECRET] \"{}\"".format(secret))
-    f.write("[FINAL SECRET] \"{}\"".format(secret))
+    f.write("[FINAL SECRET] {}\n".format(secret))
     print("-----------------------------------------------------")
-    f.write("-----------------------------------------------------")
+    f.write("-----------------------------------------------------\n")
 
     # nos conectamos con el socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
