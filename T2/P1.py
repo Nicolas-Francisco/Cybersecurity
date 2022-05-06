@@ -22,6 +22,10 @@ if __name__ == "__main__":
     sock_input.bind(CONNECTION_ADDR)
     sock_input.listen(1)
 
+    backend = default_backend()     # Configuración que la librería pide pero no usa por un problema de diseño
+    key = os.urandom(16)            # Llave usada por el cifrador de bloque
+    iv = os.urandom(16)             # Vector de inicialización usado por el modo
+
     while True:
         conn, addr = sock_input.accept()
         actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
@@ -51,9 +55,7 @@ if __name__ == "__main__":
             t = gzip.compress(msj.encode())
             # print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
 
-            backend = default_backend()     # Configuración que la librería pide pero no usa por un problema de diseño
-            key = os.urandom(16)            # Llave usada por el cifrador de bloque
-            iv = os.urandom(16)             # Vector de inicialización usado por el modo
+
 
             # Se crea el cifrador de bloque AES CBC
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
@@ -73,7 +75,7 @@ if __name__ == "__main__":
             
             # Se pasa el mensaje cifrado a hexadecimal
             hex_msj = ct.hex()
-            # print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
+            print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
 
             # Se envia el mensaje cifrado. En este caso no es necesario
             conn.send(hex_msj.encode())
