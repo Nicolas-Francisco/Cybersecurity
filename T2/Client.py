@@ -29,6 +29,7 @@ def ALGORITHM(KNOWN):
     POSSIBLE = []       # arreglo vacío con todas las respuestas posibles
     
     for c in W:         # recorremos todos los caracteres de w
+        print("-----------------------------------------------------")
         BASE_MSJ = PADDING + KNOWN + NO_W + c
         BASE_LENGTH = COMPRESSION_ORACLE(BASE_MSJ)
         print("Texto BASE en request enviada = {}".format(BASE_MSJ))
@@ -38,6 +39,7 @@ def ALGORITHM(KNOWN):
         C_LENGTH = COMPRESSION_ORACLE(C_MSJ)
         print("Texto C en request enviada = {}".format(C_MSJ))
         print("Largo de texto C en request = {}".format(C_LENGTH))
+        print("-----------------------------------------------------")
 
         if C_LENGTH < BASE_LENGTH:
             POSSIBLE.append(c)
