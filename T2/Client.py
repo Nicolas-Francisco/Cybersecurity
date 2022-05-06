@@ -9,6 +9,7 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 CONNECTION_ADDR = (sys.argv[1], 5327)
+f = open('Cliente_Logs', 'w')
 
 def COMPRESSION_ORACLE(MSJ):
     # nos conectamos con el socket
@@ -30,16 +31,22 @@ def ALGORITHM(KNOWN):
     
     for c in W:         # recorremos todos los caracteres de w
         print("-----------------------------------------------------")
+        f.write("-----------------------------------------------------")
         BASE_MSJ = PADDING + KNOWN + NO_W + c
         BASE_LENGTH = COMPRESSION_ORACLE(BASE_MSJ)
         print("Texto BASE en request enviada = {}".format(BASE_MSJ))
+        f.write("Texto BASE en request enviada = {}".format(BASE_MSJ))
         print("Largo de texto BASE en request = {}".format(BASE_LENGTH))
+        f.write("Largo de texto BASE en request = {}".format(BASE_LENGTH))
         
         C_MSJ = PADDING + KNOWN + c + NO_W
         C_LENGTH = COMPRESSION_ORACLE(C_MSJ)
         print("Texto C en request enviada = {}".format(C_MSJ))
+        f.write("Texto C en request enviada = {}".format(C_MSJ))
         print("Largo de texto C en request = {}".format(C_LENGTH))
+        f.write("Largo de texto C en request = {}".format(C_LENGTH))
         print("-----------------------------------------------------")
+        f.write("-----------------------------------------------------")
 
         if C_LENGTH < BASE_LENGTH:
             POSSIBLE.append(c)
@@ -81,13 +88,29 @@ if __name__ == "__main__":
     iv = os.urandom(16)  
     IKNOW = 'Cookie: secret='
     actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+    
+
     print("Fecha del log: {}".format(actual_time))
+    f.write("Fecha del log: {}".format(actual_time))
 
     print("-----------------------------------------------------")
+    f.write("-----------------------------------------------------")
     print("-------------------- CRIME ATTACK -------------------")
+    f.write("-------------------- CRIME ATTACK -------------------")
 
     secret = CRIME_ATTACK(IKNOW)
 
     print("-----------------------------------------------------")
+    f.write("-----------------------------------------------------")
     print("[FINAL SECRET] \"{}\"".format(secret))
+    f.write("[FINAL SECRET] \"{}\"".format(secret))
     print("-----------------------------------------------------")
+    f.write("-----------------------------------------------------")
+
+    # nos conectamos con el socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(CONNECTION_ADDR)
+    
+    # enviamos el mensaje para su compresión
+    s.sendall("$quit".encode())
+    s.close()
