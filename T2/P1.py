@@ -29,14 +29,13 @@ if __name__ == "__main__":
     while True:
         conn, addr = sock_input.accept()
         actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-       
-        data = conn.recv(4096)
+        data_total = conn.recv(4096)
 
         # log solicitado
         print("-----------------------------------------------------")
         print("Fecha del log: {}".format(actual_time))
-        print("Texto en request recibida: {}".format(data))
-        # print("IP en request recibida: {}".format(addr[1]))
+        print("Texto en request recibida: {}".format(data_total))
+        print("IP en request recibida: {}".format(addr[1]))
 
         # se dan los datos recibidos por el servidor y el mensaje secreto
         # al header para proceder con el cifrado

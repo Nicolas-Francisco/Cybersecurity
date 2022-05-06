@@ -8,9 +8,10 @@ import os
 CONNECTION_ADDR = ('localhost', 5327)
 
 def COMPRESSION_ORACLE(MSJ):
-    #print("COMPRESION_ORACLE")
+    # nos conectamos con el socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(CONNECTION_ADDR)
+    
     # enviamos el mensaje para su compresión
     s.sendall(MSJ.encode())
     # recibimos lo entregado por el servidor
@@ -20,6 +21,7 @@ def COMPRESSION_ORACLE(MSJ):
 
 
 def ALGORITHM(KNOWN):
+    # computamos el padding para el mensaje con el NO_W
     PADDING = COMPUTE_PADDING(KNOWN + NO_W)
     POSSIBLE = []       # arreglo vacío con todas las respuestas posibles
     
@@ -36,7 +38,6 @@ def ALGORITHM(KNOWN):
 
         if C_LENGTH < BASE_LENGTH:
             POSSIBLE.append(c)
-
     return POSSIBLE
 
 
@@ -53,20 +54,19 @@ def COMPUTE_PADDING(KNOWN):
 
 
 def CRIME_ATTACK(IKNOW):
+    # computamos la respuesta por primera vez con lo que sabemos
     RESPONSE = ALGORITHM(IKNOW)
 
-    left=32
-    
-    while left >0:
-        POSSIBLES=[]
+    left = 32
+    while left > 0:
+        POSSIBLES = []
         for p in RESPONSE:
             POSSIBLE = ALGORITHM(IKNOW + p)
-            for j in  POSSIBLE:
+            for j in POSSIBLE:
                 POSSIBLES.append(p+j)
-        RESPONSE=  POSSIBLES
-        print("[lista de posibles valores de secret] = {}".format(RESPONSE))
-        left-=1
-    print("SU SECRETO BIEN SECRETO ES {}".format("".join(RESPONSE)))
+        RESPONSE = POSSIBLES
+        left -= 1
+        print("[SECRET] {}".format(RESPONSE))
     return RESPONSE
 
 
@@ -79,10 +79,11 @@ if __name__ == "__main__":
     actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
     print("Fecha del log: {}".format(actual_time))
 
-
     print("-----------------------------------------------------")
     print("-------------------- CRIME ATTACK -------------------")
 
-    CRIME_ATTACK(IKNOW)
+    secret = CRIME_ATTACK(IKNOW)
 
+    print("-----------------------------------------------------")
+    print("[FINAL SECRET] \"{}\"".format(secret))
     print("-----------------------------------------------------")
