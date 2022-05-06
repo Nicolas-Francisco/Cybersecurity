@@ -21,7 +21,7 @@ formatMessage = "GET {} HTTP/1.1\nCookie: secret={}\nHost: cc5325.dcc\n\n"
 # mensaje secreto
 SECRET = "H0LAaaa3ST03SUNS3CRE70MUYS3CR3T0"
 
-file = open("server_logs.txt","w+")
+file = open("Server_Logs.txt","w+")
 
 if __name__ == "__main__":
     print("Servidor inicializado, a la espera de cliente")
