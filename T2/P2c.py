@@ -40,8 +40,14 @@ def ALGORITHM(socket, KNOWN):
 
     # RESPONSES contendrá todas las posibles soluciones para SECRET,
     # justo después de KNOWN
+    print(POSSIBLE)
+    RESPONSES = []
+    if POSSIBLE!= []:
+        for p in POSSIBLE:
+            RESPONSES +=ALGORITHM(KNOWN+P)
+
     
-    return POSSIBLE
+    return RESPONSES
 
 
 def COMPUTE_PADDING(socket, KNOWN):
@@ -62,18 +68,6 @@ def CRIME_ATTACK(socket, KNOWN):
 
     # computamos la respuesta
     RESPONSE = ALGORITHM(socket, KNOWN)
-
-    left=31
-    
-    while left >0:
-        POSSIBLES=[]
-        for p in RESPONSE:
-            POSSIBLE = ALGORITHM(socket, KNOWN + p)
-            for j in  POSSIBLE:
-                POSSIBLES.append(p+j)
-        RESPONSE=  POSSIBLES
-        left-=1
-
     print(RESPONSE)
     return RESPONSE
 
