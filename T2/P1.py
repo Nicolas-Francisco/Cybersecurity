@@ -42,7 +42,7 @@ if __name__ == "__main__":
             # log solicitado
             # print("-----------------------------------------------------")
             # print("Fecha del log: {}".format(actual_time))
-            print("Texto en request recibida:\n{}".format(data.decode()))
+            print("Texto en request recibida: {}".format(data.decode()))
             # print("IP en request recibida: {}".format(addr[1]))
 
             # se dan los datos recibidos por el servidor y el mensaje secreto
@@ -54,8 +54,6 @@ if __name__ == "__main__":
             # se comprime el mensaje en bytes
             t = gzip.compress(msj.encode())
             # print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
-
-
 
             # Se crea el cifrador de bloque AES CBC
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
