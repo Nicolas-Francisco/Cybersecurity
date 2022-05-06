@@ -20,10 +20,19 @@ def COMPRESSION_ORACLE(socket, MSJ):
 
 
 def ALGORITHM(socket, KNOWN):
+    PADDING = COMPUTE_PADDING(socket, KNOWN + NO_W)
+    KNOWN = PADDING + KNOWN
+    print("[KNOW2] \"{}\"".format(KNOWN))
+    # computamos la respuesta
     POSSIBLE = []       # arreglo vacío con todas las respuestas posibles
     for c in W:         # recorremos todos los caracteres de w
         BASE_LENGTH = COMPRESSION_ORACLE(socket, KNOWN + NO_W + c)
         C_LENGTH = COMPRESSION_ORACLE(socket, KNOWN + c + NO_W)
+        if c == 'H' or c == 'I':
+            print("[c] \"{}\"".format(c))
+            print("[BASE_LENGTH] \"{}\"".format(BASE_LENGTH))
+            print("[C_LENGTH] \"{}\"".format(C_LENGTH))
+
         if C_LENGTH < BASE_LENGTH:
             print("a")
             POSSIBLE.append(c)
@@ -31,13 +40,11 @@ def ALGORITHM(socket, KNOWN):
     print("[POSSIBLE] \"{}\"".format(POSSIBLE))
     # RESPONSES contendrá todas las posibles soluciones para SECRET,
     # justo después de KNOWN
-    print(POSSIBLE)
     RESPONSES = []
     if POSSIBLE!= []:
         for p in POSSIBLE:
-            RESPONSES +=ALGORITHM(KNOWN+P)
+            RESPONSES +=ALGORITHM(KNOWN + p)
 
-    
     return RESPONSES
 
 
@@ -50,21 +57,17 @@ def COMPUTE_PADDING(socket, KNOWN):
         NEW_LENGTH = COMPRESSION_ORACLE(socket, BASURA + KNOWN)
         if NEW_LENGTH <= BASE_LENGTH:
             BASURA += random.choice(W)
-
     return BASURA[:-1]
 
 
 def CRIME_ATTACK(socket, IKNOW):
     SECRET = ''
-    while len(SECRET) < 32:
-        PADDING = COMPUTE_PADDING(socket, IKNOW + SECRET)
-        print("[PADDING] \"{}\"".format(PADDING))
+    # while len(SECRET) < 32:
 
-        KNOWN =  PADDING + IKNOW + SECRET
+    print("[KNOW1] \"{}\"".format(IKNOW))
+    RESPONSES = ALGORITHM(socket, IKNOW)
 
-        # computamos la respuesta
-        RESPONSES = ALGORITHM(socket, KNOWN)
-        print("[RESPONSES] \"{}\"".format(RESPONSES))
+    print("[RESPONSES] \"{}\"".format(RESPONSES))
         
     print("[SECRET] \"{}\"".format(SECRET))
     return SECRET

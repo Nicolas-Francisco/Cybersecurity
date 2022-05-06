@@ -40,7 +40,7 @@ if __name__ == "__main__":
                 break
 
             # log solicitado
-            # print("-----------------------------------------------------")
+            print("-----------------------------------------------------")
             # print("Fecha del log: {}".format(actual_time))
             print("Texto en request recibida: {}".format(data.decode()))
             # print("IP en request recibida: {}".format(addr[1]))
@@ -49,24 +49,26 @@ if __name__ == "__main__":
             # al header para proceder con el cifrado
             msj = formatMessage.format(data.decode(), SECRET)
 
-            # print("Largo de respuesta no comprimida: {}".format(len(msj)))
+            print("Largo de respuesta no comprimida: {}".format(len(msj)))
 
             # se comprime el mensaje en bytes
             t = gzip.compress(msj.encode())
-            # print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
+            print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
 
             # Se crea el cifrador de bloque AES CBC
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
             encryptor = cipher.encryptor() 
 
             # Se crea un padder para el mensaje, ya que se requiere que tenga multiplo de 16
-            padder = padding.PKCS7(algorithms.AES.block_size).padder()
+            if (len(t) % 16) != 0:
+                padder = padding.PKCS7(algorithms.AES.block_size).padder()
 
-            # Se le aplica el padder al mensaje
-            t_padded = padder.update(t)
-            t_padded += padder.finalize()
+                # Se le aplica el padder al mensaje
+                t_padded = padder.update(t)
+                t_padded += padder.finalize()
 
-            # print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
+
+            print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
             # Se cifra el mensaje con padding
             ct = encryptor.update(t_padded)     # Entrega parte de lo encriptado
             ct += encryptor.finalize()          # Devuelve todo lo encriptado
