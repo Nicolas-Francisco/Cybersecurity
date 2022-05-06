@@ -36,20 +36,20 @@ if __name__ == "__main__":
                 break
 
             # log solicitado
-            print("-----------------------------------------------------")
-            print("Fecha del log: {}".format(actual_time))
-            print("Texto en request recibida: {}".format(data.decode()))
-            print("IP en request recibida: {}".format(addr[1]))
+            # print("-----------------------------------------------------")
+            # print("Fecha del log: {}".format(actual_time))
+            print("Texto en request recibida:\n{}".format(data.decode()))
+            # print("IP en request recibida: {}".format(addr[1]))
 
             # se dan los datos recibidos por el servidor y el mensaje secreto
             # al header para proceder con el cifrado
             msj = formatMessage.format(data.decode(), SECRET)
 
-            print("Largo de respuesta no comprimida: {}".format(len(msj)))
+            # print("Largo de respuesta no comprimida: {}".format(len(msj)))
 
             # se comprime el mensaje en bytes
             t = gzip.compress(msj.encode())
-            print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
+            # print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
 
             backend = default_backend()     # Configuración que la librería pide pero no usa por un problema de diseño
             key = os.urandom(16)            # Llave usada por el cifrador de bloque
@@ -66,14 +66,14 @@ if __name__ == "__main__":
             t_padded = padder.update(t)
             t_padded += padder.finalize()
 
-            print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
+            # print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
             # Se cifra el mensaje con padding
             ct = encryptor.update(t_padded)     # Entrega parte de lo encriptado
             ct += encryptor.finalize()          # Devuelve todo lo encriptado
             
             # Se pasa el mensaje cifrado a hexadecimal
             hex_msj = ct.hex()
-            print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
+            # print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
 
             # Se envia el mensaje cifrado. En este caso no es necesario
             conn.send(hex_msj.encode())

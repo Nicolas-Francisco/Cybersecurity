@@ -11,35 +11,18 @@ CONNECTION_ADDR = ('localhost', 5327)
 # # mensaje secreto
 # SECRET = "H0LAaaa3ST03SUNS3CRE70MUYS3CR3T0"
 
-
-#KNOWN = 'Cookie: secret='      # porción del texto adyascente al secreto
-#SECRET = ''     # secreto que queremos encontrar
-#X = ''                                  # bytearray o string
-#GZIP_X = gzip.compress(X.encode())      # gzip de X
-#key = os.urandom(16)  
-#iv = os.urandom(16)   
+def COMPRESSION_ORACLE(socket, MSJ):
+    # enviamos el mensaje para su compresión
+    socket.send(MSJ.encode())
+    return socket.recv(4096).decode() 
 
 
-def encrypt_aes_cbc(msj):           
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-    encryptor = cipher.encryptor() 
-    padder = padding.PKCS7(algorithms.AES.block_size).padder()
-    t_padded = padder.update(msj) + padder.finalize()
-    ENCRYPT_X = encryptor.update(t_padded) + encryptor.finalize()   
-    return ENCRYPT_X
-
-
-def COMPRESSION_ORACLE(DATA):
-    return len(encrypt_aes_cbc(gzip.compress(DATA.encode())))
-
-
-def ALGORITHM(KNOWN):
+def ALGORITHM(socket, KNOWN):
     POSSIBLE = []   # arreglo vacío con todas las respuestas posibles
-    # UNCOMPRESSED_LENGTH = COMPRESSION_ORACLE(KNOWN + y)
-    NO_W = '#$&!°'       # conjunto de caracteres que no están en w
+    NO_W = '#$&!°'  # conjunto de caracteres que no están en w
     for c in W:     # recorremos todos los caracteres de w
-        BASE_LENGTH = COMPRESSION_ORACLE(KNOWN + NO_W + c)
-        C_LENGTH = COMPRESSION_ORACLE(KNOWN + c + NO_W)
+        BASE_LENGTH = COMPRESSION_ORACLE(socket, KNOWN + NO_W + c)
+        C_LENGTH = COMPRESSION_ORACLE(socket, KNOWN + c + NO_W)
         if C_LENGTH < BASE_LENGTH:
             POSSIBLE.append(c)
 
@@ -48,35 +31,34 @@ def ALGORITHM(KNOWN):
     RESPONSES = []
     if POSSIBLE != []:
         for p in POSSIBLE:
-            RESPONSES += ALGORITHM(KNOWN + p)
+            RESPONSES += ALGORITHM(socket, KNOWN + p)
 
     return RESPONSES
 
 
-def COMPUTE_PADDING(KNOWN):
+def COMPUTE_PADDING(socket, KNOWN):
     # computamos un padding para que el largo calce con el largo del bloque
-    BASE_LENGTH = COMPRESSION_ORACLE(KNOWN)
+    BASE_LENGTH = COMPRESSION_ORACLE(socket, KNOWN)
     NEW_LENGTH = BASE_LENGTH
     BASURA = ''
     while NEW_LENGTH == BASE_LENGTH:
-        NEW_LENGTH = COMPRESSION_ORACLE(BASURA + KNOWN)
+        NEW_LENGTH = COMPRESSION_ORACLE(socket, BASURA + KNOWN)
         if NEW_LENGTH <= BASE_LENGTH:
             BASURA += random.choice(W)
 
-    #IKNOWN = BASURA + IKNOWN
     return BASURA[:-1]
 
 
-def CRIME_ATTACK(MSJ):
+def CRIME_ATTACK(socket, KNOWN):
     # computamos el padding
-    PADDING = COMPUTE_PADDING(MSJ)
+    PADDING = COMPUTE_PADDING(socket, KNOWN)
     print("[PADDING] \"{}\"".format(PADDING))
 
-    MSJ =  PADDING + MSJ
+    KNOWN =  PADDING + KNOWN
+    print("[KNOWN] \"{}\"".format(KNOWN))
+
     # computamos la respuesta
-    RESPONSE = ALGORITHM(MSJ)
-    print("[RESPONSES] \"{}\"".format(RESPONSE))
-    
+    RESPONSE = ALGORITHM(socket, KNOWN)
     SECRET = ''
     for r in RESPONSE:
         SECRET += r[-1]
@@ -89,28 +71,16 @@ if __name__ == "__main__":
     W = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     key = os.urandom(16)  
     iv = os.urandom(16)  
-    IKNOW = 'Cookie: secret='      # porción del texto adyascente al secreto 
+    IKNOW = 'Cookie: secret='
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(CONNECTION_ADDR)
     while True:
         try:
-            # Se lee un mensaje desde el sys
-            response = input("send a message: ")
-
-            # Se envia el mensaje en bytess
-            s.send(response.encode())
-
-            # Se recibe la respuesta y se imprime como mensaje del servidor
-            print("[Client] \"{}\"".format(response))
-            resp = s.recv(4096).decode()    
-            print("[Server] \"{}\"".format(resp))
-
+            print("-----------------------------------------------------")
             print("-------------------- CRIME ATTACK -------------------")
 
-            # ejecutamos el ataque CRIME definido en la clase P2b
-            CRIME_ATTACK(resp+IKNOW)
+            CRIME_ATTACK(s, IKNOW)
 
-            
             print("-----------------------------------------------------")
         except Exception as e:
             print(e)
