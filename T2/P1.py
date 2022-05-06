@@ -29,32 +29,18 @@ if __name__ == "__main__":
     while True:
         conn, addr = sock_input.accept()
         actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        data_total = " "
        
-        data_total = conn.recv(4096)
-        #while True:
-         #   try:
-          #      data = conn.recv(16)
-           #     data_total += data.decode()
-#
- #               if len(data)<16:
-  #                  print("no more")
-   #                 break
-
-    #        except Exception as e:
-     #           print(e)
-      #          #print("Closing...")
-       #         break
+        data = conn.recv(4096)
 
         # log solicitado
-        # print("-----------------------------------------------------")
-        # print("Fecha del log: {}".format(actual_time))
-        print("Texto en request recibida: {}".format(data_total))
+        print("-----------------------------------------------------")
+        print("Fecha del log: {}".format(actual_time))
+        print("Texto en request recibida: {}".format(data))
         # print("IP en request recibida: {}".format(addr[1]))
 
         # se dan los datos recibidos por el servidor y el mensaje secreto
         # al header para proceder con el cifrado
-        msj = formatMessage.format(data_total, SECRET)
+        msj = formatMessage.format(data, SECRET)
 
         print("Largo de respuesta no comprimida: {}".format(len(msj)))
 
@@ -66,15 +52,12 @@ if __name__ == "__main__":
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
         encryptor = cipher.encryptor() 
 
-        if len(t)%16 !=0:
-            # Se crea un padder para el mensaje, ya que se requiere que tenga multiplo de 16
-            padder = padding.PKCS7(algorithms.AES.block_size).padder()
+        # Se crea un padder para el mensaje, ya que se requiere que tenga multiplo de 16
+        padder = padding.PKCS7(algorithms.AES.block_size).padder()
 
-            # Se le aplica el padder al mensaje
-            t_padded = padder.update(t)
-            t_padded += padder.finalize()
-        else:
-            t_padded=t
+        # Se le aplica el padder al mensaje
+        t_padded = padder.update(t)
+        t_padded += padder.finalize()
 
         print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
         # Se cifra el mensaje con padding
