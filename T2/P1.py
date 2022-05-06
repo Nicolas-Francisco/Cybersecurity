@@ -29,56 +29,46 @@ if __name__ == "__main__":
     while True:
         conn, addr = sock_input.accept()
         actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-       
-        while True:
-            try:
-                data = conn.recv(4096)
+        data_total = conn.recv(4096)
 
-            except Exception as e:
-                print(e)
-                print("Closing...")
-                break
+        # log solicitado
+        print("-----------------------------------------------------")
+        print("Fecha del log: {}".format(actual_time))
+        print("Texto en request recibida: {}".format(data_total))
+        print("IP en request recibida: {}".format(addr[1]))
 
-            # log solicitado
-            print("-----------------------------------------------------")
-            # print("Fecha del log: {}".format(actual_time))
-            print("Texto en request recibida: {}".format(data.decode()))
-            # print("IP en request recibida: {}".format(addr[1]))
+        # se dan los datos recibidos por el servidor y el mensaje secreto
+        # al header para proceder con el cifrado
+        msj = formatMessage.format(data_total, SECRET)
 
-            # se dan los datos recibidos por el servidor y el mensaje secreto
-            # al header para proceder con el cifrado
-            msj = formatMessage.format(data.decode(), SECRET)
+        print("Largo de respuesta no comprimida: {}".format(len(msj)))
 
-            print("Largo de respuesta no comprimida: {}".format(len(msj)))
+        # se comprime el mensaje en bytes
+        t = gzip.compress(msj.encode())
+        print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
 
-            # se comprime el mensaje en bytes
-            t = gzip.compress(msj.encode())
-            print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
+        # Se crea el cifrador de bloque AES CBC
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+        encryptor = cipher.encryptor() 
 
-            # Se crea el cifrador de bloque AES CBC
-            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
-            encryptor = cipher.encryptor() 
+        # Se crea un padder para el mensaje, ya que se requiere que tenga multiplo de 16
+        padder = padding.PKCS7(algorithms.AES.block_size).padder()
 
-            # Se crea un padder para el mensaje, ya que se requiere que tenga multiplo de 16
-            if (len(t) % 16) != 0:
-                padder = padding.PKCS7(algorithms.AES.block_size).padder()
+        # Se le aplica el padder al mensaje
+        t_padded = padder.update(t)
+        t_padded += padder.finalize()
 
-                # Se le aplica el padder al mensaje
-                t_padded = padder.update(t)
-                t_padded += padder.finalize()
+        print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
+        # Se cifra el mensaje con padding
+        ct = encryptor.update(t_padded)     # Entrega parte de lo encriptado
+        ct += encryptor.finalize()          # Devuelve todo lo encriptado
+        
+        # Se pasa el mensaje cifrado a hexadecimal
+        hex_msj = ct.hex()
+        print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
 
-
-            print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
-            # Se cifra el mensaje con padding
-            ct = encryptor.update(t_padded)     # Entrega parte de lo encriptado
-            ct += encryptor.finalize()          # Devuelve todo lo encriptado
-            
-            # Se pasa el mensaje cifrado a hexadecimal
-            hex_msj = ct.hex()
-            print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
-
-            # Se envia el mensaje cifrado. En este caso no es necesario
-            conn.send(hex_msj.encode())
+        # Se envia el mensaje cifrado. En este caso no es necesario
+        conn.send(hex_msj.encode())
 
         conn.close()
-        print('Closing Server...')
+        print('Closing conection')

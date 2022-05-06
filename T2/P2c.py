@@ -13,64 +13,60 @@ CONNECTION_ADDR = ('localhost', 5327)
 # # mensaje secreto
 # SECRET = "H0LAaaa3ST03SUNS3CRE70MUYS3CR3T0"
 
-def COMPRESSION_ORACLE(socket, MSJ):
+def COMPRESSION_ORACLE(MSJ):
+    # nos conectamos con el socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(CONNECTION_ADDR)
+    
     # enviamos el mensaje para su compresión
-    socket.send(MSJ.encode())
-    return len(socket.recv(4096).decode())
+    s.sendall(MSJ.encode())
+    data_total = s.recv(4096)
+    s.close()
+    return len(data_total)
 
 
-def ALGORITHM(socket, KNOWN):
-    PADDING = COMPUTE_PADDING(socket, KNOWN + NO_W)
-    KNOWN = PADDING + KNOWN
-    print("[KNOW2] \"{}\"".format(KNOWN))
-    # computamos la respuesta
+def ALGORITHM(KNOWN):
+    # computamos el padding para el mensaje con el NO_W
+    PADDING = COMPUTE_PADDING(KNOWN + NO_W)
     POSSIBLE = []       # arreglo vacío con todas las respuestas posibles
     for c in W:         # recorremos todos los caracteres de w
-        BASE_LENGTH = COMPRESSION_ORACLE(socket, KNOWN + NO_W + c)
-        C_LENGTH = COMPRESSION_ORACLE(socket, KNOWN + c + NO_W)
-        if c == 'H' or c == 'I':
-            print("[c] \"{}\"".format(c))
-            print("[BASE_LENGTH] \"{}\"".format(BASE_LENGTH))
-            print("[C_LENGTH] \"{}\"".format(C_LENGTH))
-
+        BASE_LENGTH = COMPRESSION_ORACLE(PADDING + KNOWN + NO_W + c)
+        C_LENGTH = COMPRESSION_ORACLE(PADDING + KNOWN + c + NO_W)
         if C_LENGTH < BASE_LENGTH:
-            print("a")
             POSSIBLE.append(c)
 
     print("[POSSIBLE] \"{}\"".format(POSSIBLE))
-    # RESPONSES contendrá todas las posibles soluciones para SECRET,
-    # justo después de KNOWN
-    RESPONSES = []
-    if POSSIBLE!= []:
-        for p in POSSIBLE:
-            RESPONSES +=ALGORITHM(KNOWN + p)
-
-    return RESPONSES
+    return POSSIBLE
 
 
-def COMPUTE_PADDING(socket, KNOWN):
+def COMPUTE_PADDING(KNOWN):
     # computamos un padding para que el largo calce con el largo del bloque
-    BASE_LENGTH = COMPRESSION_ORACLE(socket, KNOWN)
+    BASE_LENGTH = COMPRESSION_ORACLE(KNOWN)
     NEW_LENGTH = BASE_LENGTH
     BASURA = ''
     while NEW_LENGTH == BASE_LENGTH:
-        NEW_LENGTH = COMPRESSION_ORACLE(socket, BASURA + KNOWN)
+        NEW_LENGTH = COMPRESSION_ORACLE(BASURA + KNOWN)
         if NEW_LENGTH <= BASE_LENGTH:
             BASURA += random.choice(W)
     return BASURA[:-1]
 
 
-def CRIME_ATTACK(socket, IKNOW):
-    SECRET = ''
-    # while len(SECRET) < 32:
+def CRIME_ATTACK(IKNOW):
+    # computamos la respuesta por primera vez con lo que sabemos
+    RESPONSE = ALGORITHM(IKNOW)
+    print("[RESPONSES] \"{}\"".format(RESPONSE))
 
-    print("[KNOW1] \"{}\"".format(IKNOW))
-    RESPONSES = ALGORITHM(socket, IKNOW)
-
-    print("[RESPONSES] \"{}\"".format(RESPONSES))
-        
-    print("[SECRET] \"{}\"".format(SECRET))
-    return SECRET
+    left = 32
+    while left > 0:
+        POSSIBLES = []
+        for p in RESPONSE:
+            POSSIBLE = ALGORITHM(IKNOW + p)
+            for j in POSSIBLE:
+                POSSIBLES.append(p+j)
+        RESPONSE = POSSIBLES
+        left -= 1
+        print("[SECRET] {}".format(RESPONSE))
+    return RESPONSE
 
 
 if __name__ == "__main__":
@@ -79,20 +75,12 @@ if __name__ == "__main__":
     key = os.urandom(16)  
     iv = os.urandom(16)  
     IKNOW = 'Cookie: secret='
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(CONNECTION_ADDR)
-    # while True:
 
-    try:
-        print("-----------------------------------------------------")
-        print("-------------------- CRIME ATTACK -------------------")
+    print("-----------------------------------------------------")
+    print("-------------------- CRIME ATTACK -------------------")
 
-        CRIME_ATTACK(s, IKNOW)
+    secret = CRIME_ATTACK(IKNOW)
 
-        print("-----------------------------------------------------")
-    except Exception as e:
-        print(e)
-        print("Closing Client...")
-        input.close()
-        s.close()
-        # break
+    print("-----------------------------------------------------")
+    print("[FINAL SECRET] \"{}\"".format(secret))
+    print("-----------------------------------------------------")
