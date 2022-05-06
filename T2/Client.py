@@ -5,7 +5,7 @@ import os
 import sys
 
 if len(sys.argv) != 2:
-    print('Use: ' + 'IP VPN SERVIDOR')
+    print('Use valid IPv4_ADDRESS')
     sys.exit(1)
 
 CONNECTION_ADDR = (sys.argv[1], 5327)
@@ -71,7 +71,6 @@ def CRIME_ATTACK(IKNOW):
                 POSSIBLES.append(p+j)
         RESPONSE = POSSIBLES
         left -= 1
-        print("Lista de posibles valores de SECRET = {}". format(RESPONSE))
     return "".join(RESPONSE)
 
 

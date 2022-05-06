@@ -50,10 +50,6 @@ if __name__ == "__main__":
 
         print("Largo de respuesta no comprimida: {}".format(len(msj)))
 
-        # Se crea el cifrador de bloque AES CBC
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
-        encryptor = cipher.encryptor() 
-
         # Se crea un padder para el mensaje, ya que se requiere que tenga multiplo de 16
         padder = padding.PKCS7(algorithms.AES.block_size).padder()
 
@@ -61,18 +57,24 @@ if __name__ == "__main__":
         msj_padded = padder.update(msj)
         msj_padded += padder.finalize()
 
-        print("Largo de respuesta comprimida con gzip padeado: {}".format(len(msj_padded)))
+        print("Largo de respuesta no comprimida padeada: {}".format(len(msj_padded)))
+
+        # Se crea el cifrador de bloque AES CBC
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+        encryptor = cipher.encryptor() 
+
         # Se cifra el mensaje con padding
         ct = encryptor.update(msj_padded)     # Entrega parte de lo encriptado
         ct += encryptor.finalize()          # Devuelve todo lo encriptado
         
+        print("Largo de respuesta no comprimida cifrada: {}".format(len(ct)))
+
         # se comprime el mensaje en bytes
         t = gzip.compress(ct)
-        print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
-        
+
         # Se pasa el mensaje cifrado a hexadecimal
         hex_msj = t.hex()
-        print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
+        print("Largo de respuesta cifrada y comprimida con gzip : {}".format(len(hex_msj)//2))
 
         # Se envia el mensaje cifrado. En este caso no es necesario
         conn.send(hex_msj.encode())
