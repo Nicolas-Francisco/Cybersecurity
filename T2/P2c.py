@@ -1,17 +1,11 @@
 from re import I
 import socket
 import random
-import gzip
+import time
 import os
-from urllib import response
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import padding 
+
 
 CONNECTION_ADDR = ('localhost', 5327)
-
-# # mensaje secreto
-# SECRET = "H0LAaaa3ST03SUNS3CRE70MUYS3CR3T0"
 
 def COMPRESSION_ORACLE(MSJ):
     # nos conectamos con el socket
@@ -20,22 +14,30 @@ def COMPRESSION_ORACLE(MSJ):
     
     # enviamos el mensaje para su compresión
     s.sendall(MSJ.encode())
-    data_total = s.recv(4096)
+    # recibimos lo entregado por el servidor
+    data = s.recv(4096)
     s.close()
-    return len(data_total)
+    return len(data)
 
 
 def ALGORITHM(KNOWN):
     # computamos el padding para el mensaje con el NO_W
     PADDING = COMPUTE_PADDING(KNOWN + NO_W)
     POSSIBLE = []       # arreglo vacío con todas las respuestas posibles
+    
     for c in W:         # recorremos todos los caracteres de w
-        BASE_LENGTH = COMPRESSION_ORACLE(PADDING + KNOWN + NO_W + c)
-        C_LENGTH = COMPRESSION_ORACLE(PADDING + KNOWN + c + NO_W)
+        BASE_MSJ = PADDING + KNOWN + NO_W + c
+        BASE_LENGTH = COMPRESSION_ORACLE(BASE_MSJ)
+        print("Texto BASE en request enviada = {}".format(BASE_MSJ))
+        print("Largo de texto BASE en request = {}".format(BASE_LENGTH))
+        
+        C_MSJ = PADDING + KNOWN + c + NO_W
+        C_LENGTH = COMPRESSION_ORACLE(C_MSJ)
+        print("Texto C en request enviada = {}".format(C_MSJ))
+        print("Largo de texto C en request = {}".format(C_LENGTH))
+
         if C_LENGTH < BASE_LENGTH:
             POSSIBLE.append(c)
-
-    print("[POSSIBLE] \"{}\"".format(POSSIBLE))
     return POSSIBLE
 
 
@@ -54,7 +56,6 @@ def COMPUTE_PADDING(KNOWN):
 def CRIME_ATTACK(IKNOW):
     # computamos la respuesta por primera vez con lo que sabemos
     RESPONSE = ALGORITHM(IKNOW)
-    print("[RESPONSES] \"{}\"".format(RESPONSE))
 
     left = 32
     while left > 0:
@@ -75,6 +76,8 @@ if __name__ == "__main__":
     key = os.urandom(16)  
     iv = os.urandom(16)  
     IKNOW = 'Cookie: secret='
+    actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+    print("Fecha del log: {}".format(actual_time))
 
     print("-----------------------------------------------------")
     print("-------------------- CRIME ATTACK -------------------")

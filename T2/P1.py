@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
         # se dan los datos recibidos por el servidor y el mensaje secreto
         # al header para proceder con el cifrado
-        msj = formatMessage.format(data_total, SECRET)
+        msj = formatMessage.format(data, SECRET)
 
         print("Largo de respuesta no comprimida: {}".format(len(msj)))
 
