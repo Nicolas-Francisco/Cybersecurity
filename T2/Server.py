@@ -21,6 +21,8 @@ formatMessage = "GET {} HTTP/1.1\nCookie: secret={}\nHost: cc5325.dcc\n\n"
 # mensaje secreto
 SECRET = "H0LAaaa3ST03SUNS3CRE70MUYS3CR3T0"
 
+file = open("server_logs.txt","w+")
+
 if __name__ == "__main__":
     print("Servidor inicializado, a la espera de cliente")
     sock_input = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,21 +40,33 @@ if __name__ == "__main__":
         actual_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         data_total = conn.recv(4096)
 
+        if data_total.decode() == "$quit":
+            print("Cliente desconectado")
+            file.close()
+            break
+
         # log solicitado
         print("-----------------------------------------------------")
         print("Fecha del log: {}".format(actual_time))
         print("Texto en request recibida: {}".format(data_total))
         print("IP en request recibida: {}".format(addr[1]))
+        file.write("-----------------------------------------------------")
+        file.write("Fecha del log: {}".format(actual_time))
+        file.write("Texto en request recibida: {}".format(data_total))
+        file.write("IP en request recibida: {}".format(addr[1]))
+
 
         # se dan los datos recibidos por el servidor y el mensaje secreto
         # al header para proceder con el cifrado
         msj = formatMessage.format(data_total, SECRET)
 
         print("Largo de respuesta no comprimida: {}".format(len(msj)))
+        file.write("Largo de respuesta no comprimida: {}".format(len(msj)))
 
         # se comprime el mensaje en bytes
         t = gzip.compress(msj.encode())
         print("Largo de respuesta comprimida con gzip: {}".format(len(t)))
+        file.write("Largo de respuesta comprimida con gzip: {}".format(len(t)))
 
         # Se crea el cifrador de bloque AES CBC
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
@@ -66,6 +80,7 @@ if __name__ == "__main__":
         t_padded += padder.finalize()
 
         print("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
+        file.write("Largo de respuesta comprimida con gzip padeado: {}".format(len(t_padded)))
         # Se cifra el mensaje con padding
         ct = encryptor.update(t_padded)     # Entrega parte de lo encriptado
         ct += encryptor.finalize()          # Devuelve todo lo encriptado
@@ -73,9 +88,8 @@ if __name__ == "__main__":
         # Se pasa el mensaje cifrado a hexadecimal
         hex_msj = ct.hex()
         print("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
+        file.write("Largo de respuesta comprimida con gzip cifrada: {}".format(len(hex_msj)//2))
 
         # Se envia el mensaje cifrado. En este caso no es necesario
         conn.send(hex_msj.encode())
-
         conn.close()
-        print('Closing conection')
