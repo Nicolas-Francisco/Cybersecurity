@@ -11,13 +11,13 @@ CONNECTION_ADDR = ('localhost', 5327)
 # # mensaje secreto
 # SECRET = "H0LAaaa3ST03SUNS3CRE70MUYS3CR3T0"
 
-W = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-KNOWN = 'Cookie: secret='      # porción del texto adyascente al secreto
-SECRET = ''     # secreto que queremos encontrar
-X = ''                                  # bytearray o string
-GZIP_X = gzip.compress(X.encode())      # gzip de X
-key = os.urandom(16)  
-iv = os.urandom(16)   
+
+#KNOWN = 'Cookie: secret='      # porción del texto adyascente al secreto
+#SECRET = ''     # secreto que queremos encontrar
+#X = ''                                  # bytearray o string
+#GZIP_X = gzip.compress(X.encode())      # gzip de X
+#key = os.urandom(16)  
+#iv = os.urandom(16)   
 
 
 def encrypt_aes_cbc(msj):           
@@ -63,7 +63,7 @@ def COMPUTE_PADDING(KNOWN):
         if NEW_LENGTH <= BASE_LENGTH:
             BASURA += random.choice(W)
 
-    KNOWN = BASURA + KNOWN
+    #IKNOWN = BASURA + IKNOWN
     return BASURA[:-1]
 
 
@@ -71,8 +71,10 @@ def CRIME_ATTACK(MSJ):
     # computamos el padding
     PADDING = COMPUTE_PADDING(MSJ)
     print("[PADDING] \"{}\"".format(PADDING))
+
+    MSJ =  PADDING + MSJ
     # computamos la respuesta
-    RESPONSE = ALGORITHM(PADDING)
+    RESPONSE = ALGORITHM(MSJ)
     print("[RESPONSES] \"{}\"".format(RESPONSE))
     
     SECRET = ''
@@ -84,6 +86,10 @@ def CRIME_ATTACK(MSJ):
 
 
 if __name__ == "__main__":
+    W = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    key = os.urandom(16)  
+    iv = os.urandom(16)  
+    IKNOW = 'Cookie: secret='      # porción del texto adyascente al secreto 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(CONNECTION_ADDR)
     while True:
@@ -102,7 +108,7 @@ if __name__ == "__main__":
             print("-------------------- CRIME ATTACK -------------------")
 
             # ejecutamos el ataque CRIME definido en la clase P2b
-            CRIME_ATTACK(resp)
+            CRIME_ATTACK(resp+IKNOW)
 
             
             print("-----------------------------------------------------")
